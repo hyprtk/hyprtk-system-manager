@@ -140,7 +140,7 @@ make qa      # tests + compile + qmllint + off-screen boot + installer round-tri
 Documentation screenshots are rendered, not captured from a live session:
 
 ```sh
-python3 scripts/screenshot.py            # docs/main.png, users.png, appearance.png
+python3 scripts/screenshot.py            # docs/main.png, docs/users.png
 python3 scripts/screenshot.py displays   # any page, off-screen, deterministic
 ```
 

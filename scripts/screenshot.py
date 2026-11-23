@@ -17,7 +17,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs"
-DEFAULT = [("about", "main.png"), ("users", "users.png"), ("appearance", "appearance.png")]
+DEFAULT = [("about", "main.png"), ("users", "users.png")]
 
 
 def capture(page: str, name: str) -> bool:

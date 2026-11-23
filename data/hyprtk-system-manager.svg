@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#02DEDE"/>
+      <stop offset="0.52" stop-color="#5FB8F5"/>
+      <stop offset="1" stop-color="#FD4FB6"/>
+    </linearGradient>
+    <linearGradient id="gear" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#02DEDE"/>
+      <stop offset="0.52" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#FD4FB6"/>
+    </linearGradient>
+    <radialGradient id="bg" cx="0.5" cy="0.36" r="0.82">
+      <stop offset="0" stop-color="#0E1930"/>
+      <stop offset="1" stop-color="#04050A"/>
+    </radialGradient>
+    <radialGradient id="top" cx="0.5" cy="0.12" r="0.55">
+      <stop offset="0" stop-color="#7FE9FF" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#7FE9FF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <circle cx="256" cy="256" r="240" fill="url(#bg)"/>
+  <circle cx="256" cy="256" r="240" fill="url(#top)"/>
+
+  <!-- ht monogram -->
+  <g transform="translate(139 316)">
+    <g fill="#02DEDE">
+      <path transform="translate(0 0) scale(0.25 -0.25)" d="M53 -8V729L190 743V454Q245 542 352 542Q418 542 460 510.5Q502 479 512 424Q518 386 518 329V8L374 -8V314Q374 354 364 378Q349 416 296 416Q255 416 226.5 386Q198 356 198 312V11Z"/>
+    </g>
+    <g fill="#FD4FB6">
+      <path transform="translate(142.75 0) scale(0.25 -0.25)" d="M-4 414L17 520H56V612L200 676V520H320L301 414H200V218Q200 183 203 169Q215 115 278 115Q293 115 303 117Q313 119 318 120L299 -5L249 -9Q152 -9 105 38Q78 66 66 100Q62 116 59 143Q56 170 56 203V414Z"/>
+    </g>
+  </g>
+
+  <!-- gear badge -->
+  <circle cx="352" cy="368" r="68" fill="#02DEDE" opacity="0.14"/>
+  <circle cx="352" cy="368" r="58" fill="#0C1526" stroke="url(#ring)" stroke-width="3.5"/>
+  <g transform="translate(352 368)" fill="none" stroke="url(#gear)" stroke-width="3.6" stroke-linejoin="round">
+    <path d="M0 -26 L7 -24 L9 -16 L15 -13 L23 -16 L28 -10 L24 -3 L26 0 L24 3 L28 10 L23 16 L15 13 L9 16 L7 24 L0 26 L-7 24 L-9 16 L-15 13 L-23 16 L-28 10 L-24 3 L-26 0 L-24 -3 L-28 -10 L-23 -16 L-15 -13 L-9 -16 L-7 -24 Z"/>
+    <circle cx="0" cy="0" r="9.5"/>
+  </g>
+
+  <circle cx="256" cy="256" r="240" fill="none" stroke="url(#ring)" stroke-width="2.5" opacity="0.55"/>
+</svg>

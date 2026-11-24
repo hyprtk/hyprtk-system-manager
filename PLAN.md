@@ -293,7 +293,7 @@ otherwise            → pkexec <cmd>        (polkit agent prompts)
 - [x] Input: persist the exposed settings to input.lua (managed block)
 - [x] Fonts: install picker
 - [ ] Power: `powerprofilesctl`/`tlp` when present, lid/battery actions
-- [ ] Displays: drag-to-arrange, HDR/bit-depth, profiles (VRR done)
+- [ ] Displays: HDR/bit-depth, profiles (drag/VRR/mirror done)
 - [x] Search: row-level index + recents (suggested settings still open)
 - [x] Non-blocking RPC: panel probes run on a thread pool so a slow Updates
       probe cannot freeze the UI

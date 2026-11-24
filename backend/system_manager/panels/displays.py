@@ -75,6 +75,7 @@ def parse_monitors(payload) -> list[dict]:
             "scale": float(mon.get("scale") or 1.0),
             "transform": int(mon.get("transform") or 0),
             "vrr": int(mon.get("vrr") or 0),
+            "mirror": str(mon.get("mirrorOf") or ""),
             "disabled": bool(mon.get("disabled")),
             "modes": modes,
             "currentMode": current,
@@ -142,8 +143,11 @@ def _spec(args: dict) -> str:
     scale = float(args.get("scale") or 1.0)
     transform = int(args.get("transform") or 0)
     vrr = int(args.get("vrr") or 0)
+    mirror = str(args.get("mirror") or "").strip()
     spec = f"{name},{mode},{x}x{y},{scale:g},{transform}"
-    if vrr:
+    if mirror:
+        spec += f",{vrr},{mirror}"
+    elif vrr:
         spec += f",{vrr}"
     return spec
 
@@ -163,6 +167,9 @@ def _lua_block(monitors: list[dict]) -> str:
             vrr = int(mon.get("vrr") or 0)
             if vrr:
                 fields.append("vrr = {}".format(vrr))
+            mirror = str(mon.get("mirror") or "")
+            if mirror:
+                fields.append("mirror = {}".format(json.dumps(mirror)))
         lines.append("hl.monitor({ " + ", ".join(fields) + " })")
     lines.append(END)
     return "\n".join(lines) + "\n"

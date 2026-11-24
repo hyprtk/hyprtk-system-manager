@@ -109,6 +109,15 @@ class ApplyTests(unittest.TestCase):
         self.assertEqual(argv[:3], ["hyprctl", "keyword", "monitor"])
         self.assertEqual(argv[3], "DP-1,1920x1080@60.00,0x0,1,0,1")
 
+    def test_displays_mirror_spec(self):
+        with mock.patch.object(util, "run", return_value=RunResult(0, "", "")) as runner:
+            result = displays.action("displays.apply", {
+                "name": "DP-1", "mode": "1920x1080@60.00", "scale": 1,
+                "transform": 0, "vrr": 0, "mirror": "DP-2", "x": 0, "y": 0,
+            })
+        self.assertTrue(result["ok"])
+        self.assertEqual(runner.call_args[0][0][3], "DP-1,1920x1080@60.00,0x0,1,0,0,DP-2")
+
     def test_sound_apply_input_and_streams(self):
         calls = []
 
@@ -299,7 +308,7 @@ class ApplyTests(unittest.TestCase):
              mock.patch.object(util, "run", return_value=RunResult(0, "", "")):
             result = displays.action("displays.persist", {"monitors": [
                 {"name": "DP-1", "mode": "1920x1080@60.00", "scale": 1,
-                 "transform": 0, "vrr": 1, "x": 0, "y": 0},
+                 "transform": 0, "vrr": 1, "mirror": "DP-2", "x": 0, "y": 0},
             ]})
         self.assertTrue(result["ok"])
         text = target.read_text()
@@ -307,6 +316,7 @@ class ApplyTests(unittest.TestCase):
         self.assertIn(displays.END, text)
         self.assertIn('output = "DP-1"', text)
         self.assertIn("vrr = 1", text)
+        self.assertIn('mirror = "DP-2"', text)
         self.assertIn("hl.monitor({ output = \"\", mode = \"preferred\" })", text)
 
         with mock.patch.object(paths, "monitors_file", return_value=target), \

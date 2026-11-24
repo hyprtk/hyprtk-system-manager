@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- **Displays**: a drag-to-arrange canvas — monitors are rectangles positioned in
+  global pixels, snapped to 8 px, and the cards below follow; plus per-monitor
+  **mirroring** (included in the live rule and the persistent block).
+- 86 tests: mirror in the monitor spec and persistent block.
+
 ## [0.3.0] — 2026-11-24
 
 ### Added

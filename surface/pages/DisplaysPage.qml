@@ -50,6 +50,7 @@ Flickable {
                 scale: String(mon.scale || 1),
                 transform: String(mon.transform || 0),
                 vrr: String(mon.vrr || 0),
+                mirror: mon.mirror || "",
                 x: mon.x,
                 y: mon.y,
                 disabled: mon.disabled,
@@ -73,6 +74,14 @@ Flickable {
         }
         return out;
     }
+    function mirrorChoices(current) {
+        const out = [{value: "", label: "None"}];
+        for (const mon of page.monitors) {
+            if (mon.name !== current)
+                out.push({value: mon.name, label: mon.name});
+        }
+        return out;
+    }
     function layoutEntry(index) {
         const item = layout.get(index);
         if (!item)
@@ -83,6 +92,7 @@ Flickable {
             scale: parseFloat(item.scale) || 1,
             transform: parseInt(item.transform) || 0,
             vrr: parseInt(item.vrr) || 0,
+            mirror: item.mirror || "",
             x: item.x || 0,
             y: item.y || 0,
             disabled: !!item.disabled,
@@ -114,6 +124,21 @@ Flickable {
             applyMonitor(i);
     }
 
+    readonly property real canvasScale: {
+        let totalW = 0;
+        let maxH = 1;
+        for (let i = 0; i < layout.count; i++) {
+            const item = layout.get(i);
+            if (!item || item.disabled)
+                continue;
+            totalW += item.width;
+            maxH = Math.max(maxH, item.height);
+        }
+        const available = Math.max(240, canvasItem.width - 24);
+        return Math.min(0.18, available / Math.max(1, totalW),
+                        (canvasItem.height - 24) / Math.max(1, maxH));
+    }
+
     Item {
         id: content
         width: page.width
@@ -125,6 +150,91 @@ Flickable {
             y: 20
             width: parent.width - 32
             spacing: 10
+
+            SectionCard {
+                width: column.width
+                title: "Arrangement"
+                description: "Drag a monitor to set its position. The values snap to 8 px and the cards below follow."
+
+                Item {
+                    id: canvasItem
+                    width: parent.width
+                    height: 190
+
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: 8
+                        color: Theme.alpha(Theme.background, 0.35)
+                        border.width: 1
+                        border.color: Theme.cardBorder
+                    }
+
+                    Repeater {
+                        model: layout
+                        delegate: Rectangle {
+                            id: monRect
+                            readonly property real baseX: 12 + model.x * page.canvasScale
+                            readonly property real baseY: 12 + model.y * page.canvasScale
+                            property real dragDX: 0
+                            property real dragDY: 0
+
+                            visible: !model.disabled
+                            x: monRect.baseX + monRect.dragDX
+                            y: monRect.baseY + monRect.dragDY
+                            width: Math.max(28, model.width * page.canvasScale)
+                            height: Math.max(20, model.height * page.canvasScale)
+                            radius: 6
+                            color: Theme.alpha(Theme.accent, 0.20)
+                            border.width: 1
+                            border.color: Theme.alpha(Theme.accent, 0.55)
+
+                            Text {
+                                anchors.centerIn: parent
+                                width: parent.width - 8
+                                text: model.name
+                                color: Theme.foreground
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.size(0)
+                                horizontalAlignment: Text.AlignHCenter
+                                elide: Text.ElideRight
+                            }
+                            Text {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                anchors.bottom: parent.bottom
+                                anchors.bottomMargin: 4
+                                text: model.width + "×" + model.height
+                                color: Theme.dim
+                                font.family: Theme.fontFamily
+                                font.pixelSize: 9
+                            }
+
+                            DragHandler {
+                                id: monDrag
+                                cursorShape: Qt.SizeAllCursor
+                                grabPermissions: PointerHandler.CanTakeOverFromAnything
+                                onTranslationChanged: {
+                                    const maxX = canvasItem.width - monRect.width - 12;
+                                    const maxY = canvasItem.height - monRect.height - 12;
+                                    monRect.dragDX = Math.max(12 - monRect.baseX,
+                                        Math.min(maxX - monRect.baseX, monDrag.translation.x));
+                                    monRect.dragDY = Math.max(12 - monRect.baseY,
+                                        Math.min(maxY - monRect.baseY, monDrag.translation.y));
+                                }
+                                onActiveChanged: {
+                                    if (monDrag.active)
+                                        return;
+                                    const nx = (monRect.baseX + monRect.dragDX - 12) / page.canvasScale;
+                                    const ny = (monRect.baseY + monRect.dragDY - 12) / page.canvasScale;
+                                    layout.setProperty(index, "x", Math.max(0, Math.round(nx / 8) * 8));
+                                    layout.setProperty(index, "y", Math.max(0, Math.round(ny / 8) * 8));
+                                    monRect.dragDX = 0;
+                                    monRect.dragDY = 0;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
             Repeater {
                 model: layout
@@ -185,6 +295,17 @@ Flickable {
                             value: model.vrr
                             choices: page.vrrChoices
                             onSelected: (v) => layout.setProperty(index, "vrr", v)
+                        }
+                    }
+                    SettingRow {
+                        label: "Mirror"
+                        help: "Show this output's image on another monitor."
+                        visible: !model.disabled && page.monitors.length > 1
+                        Dropdown {
+                            preferredWidth: 200
+                            value: model.mirror
+                            choices: page.mirrorChoices(model.name)
+                            onSelected: (v) => layout.setProperty(index, "mirror", v)
                         }
                     }
                     SettingRow {

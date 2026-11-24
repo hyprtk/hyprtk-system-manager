@@ -7,54 +7,11 @@ import json
 import os
 import subprocess
 import sys
-import time
 from pathlib import Path
 
 from . import __version__, apps, catalog, form, priv, state, util
 
 APP_DIR = Path(__file__).resolve().parents[2]
-WINDOW = (1180, 800)
-
-
-def place_window(timeout: float = 10.0) -> int:
-    """Float, size and pin the opacity of our own window through Hyprland.
-
-    Quickshell cannot derive Hyprland addresses from its toplevels on this
-    compositor (no hyprland-toplevel-mapping-v1), so the QML side cannot place
-    itself. This detached helper polls ``hyprctl clients`` instead, which works
-    everywhere Hyprland is running.
-    """
-    if util.which("hyprctl") is None:
-        return 1
-    deadline = time.time() + timeout
-    while time.time() < deadline:
-        clients = util.run_json(["hyprctl", "clients", "-j"], timeout=4)
-        for client in clients if isinstance(clients, list) else []:
-            if not isinstance(client, dict):
-                continue
-            if client.get("class") != "hyprtk-system-manager":
-                continue
-            addr = str(client.get("address") or "")
-            if not addr:
-                continue
-
-            def dispatch(lua: str) -> None:
-                util.run(["hyprctl", "dispatch", lua], timeout=6)
-
-            if not client.get("floating"):
-                dispatch('hl.dsp.window.float({ window = "address:%s", action = "enable" })' % addr)
-                dispatch('hl.dsp.window.resize({ x = %d, y = %d, window = "address:%s" })'
-                         % (WINDOW[0], WINDOW[1], addr))
-            dispatch('hl.dsp.window.center({ window = "address:%s" })' % addr)
-            dispatch('hl.dsp.window.set_prop({ prop = "border_size", value = "0", window = "address:%s" })' % addr)
-            dispatch('hl.dsp.window.set_prop({ prop = "no_shadow", value = "1", window = "address:%s" })' % addr)
-            dispatch('hl.dsp.window.set_prop({ prop = "opacity", value = "1.0", window = "address:%s" })' % addr)
-            dispatch('hl.dsp.window.set_prop({ prop = "opacity_inactive", value = "1.0", window = "address:%s" })' % addr)
-            return 0
-        time.sleep(0.25)
-    return 1
-
-
 def cmd_open(args) -> int:
     env = dict(os.environ)
     # Quickshell reports every toplevel as org.quickshell unless this is set,
@@ -73,22 +30,9 @@ def cmd_open(args) -> int:
     except FileNotFoundError:
         print("qs (Quickshell) not found in PATH", file=sys.stderr)
         return 1
-    if not getattr(args, "no_place", False) and not args.overlay:
-        try:
-            subprocess.Popen(
-                [sys.executable, "-m", "system_manager.cli", "place"], env=env,
-                start_new_session=True,
-                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-            )
-        except OSError:
-            pass
     if args.foreground:
         return proc.wait()
     return 0
-
-
-def cmd_place(args) -> int:
-    return place_window()
 
 
 def cmd_serve(args) -> int:
@@ -235,11 +179,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--page")
     p.add_argument("--overlay", action="store_true", help="layer-shell overlay for the bar")
     p.add_argument("--foreground", action="store_true")
-    p.add_argument("--no-place", action="store_true", help="do not float/centre the window")
     p.set_defaults(func=cmd_open)
-
-    p = sub.add_parser("place", help="float, size and pin our own window")
-    p.set_defaults(func=cmd_place)
 
     p = sub.add_parser("serve", help="JSON-lines RPC over stdio")
     p.set_defaults(func=cmd_serve)

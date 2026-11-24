@@ -263,7 +263,7 @@ otherwise            → pkexec <cmd>        (polkit agent prompts)
 | File manager | Directory picker reuses the same backend `fs.list` shape |
 | Terminal | "Open update in terminal" and root log commands launch `$TERMINAL` |
 | Suite apps | Suite panel reads installed payload versions and running pids |
-| Window | `hyprtk-settings place` floats/sizes/centres the window through `hyprctl clients` (Quickshell cannot map its toplevels on this compositor); a suite window rule should also pin `float`, `size 1180 800` and `opacity 1.0` for class `hyprtk-system-manager` |
+| Window | the standalone window is a layer-shell `PanelWindow` centred at 1180×800, like the bar's Settings; the compositor does not decorate layer surfaces, so the app's animated accent border is the only edge. Off-screen QA swaps in a `FloatingWindow` host because `PanelWindow` has no backend without Wayland |
 | Installer | `install.sh` follows the config-manager shape; merged installer step added after release |
 | Brand | `data/hyprtk-system-manager.svg`; add a `system-manager` glyph to the brand kit and regenerate v09 icons before the first public release |
 | Keybind | `SUPER+I` → `hyprtk-settings` (planned) |

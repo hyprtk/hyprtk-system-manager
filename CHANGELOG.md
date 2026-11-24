@@ -61,11 +61,15 @@ First scaffold: the whole application shape plus eight functional panels.
 
 ### Fixed
 
-- The window showed a double border: Hyprland's 2px compositor border plus the
-  app's animated accent border. The `place` helper now sets `border_size = 0`
-  and `no_shadow = 1` for our window on launch (and the QML float path does the
-  same), leaving one border and no drop-shadow halo — the same flat edge as the
-  bar's layer-shell dialogs.
+- **Double edge around the window.** The standalone window was a `FloatingWindow`,
+  so Hyprland added its own border, 10px rounding and drop shadow around the
+  app's 14px rounded accent border. It is now a layer-shell `PanelWindow` like
+  the bar's Settings and Quick Settings: layer surfaces are not decorated, so
+  the app's animated border is the only edge, with one radius and no shadow.
+  Off-screen QA and screenshots use a `FloatingWindow` host (`TestWindow.qml`).
+- **Square sidebar corner.** The sidebar rail painted a square corner outside
+  the panel's rounded border; it now rounds its top-left and bottom-left
+  corners, as the bar's Settings sidebar does.
 
 ### Changed
 

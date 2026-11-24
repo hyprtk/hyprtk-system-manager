@@ -165,12 +165,13 @@ Notable gaps that shaped the plan:
 
 ## 5. Technical constraints discovered
 
-- **Quickshell 0.3.2** is the suite's UI runtime. `FloatingWindow` is a normal
-  toplevel; Hyprland tiles it unless floated. The QML float path relies on
-  `Hyprland.toplevels`, which this compositor cannot map (no
-  `hyprland-toplevel-mapping-v1`), so `cli open` also spawns a detached `place`
-  helper that finds the window through `hyprctl clients -j` and applies
-  float/size/centre/opacity. A suite window rule is the second line of defence.
+- **Quickshell 0.3.2** is the suite's UI runtime. A `FloatingWindow` is a normal
+  toplevel and inherits Hyprland's border, rounding and drop shadow, which
+  produced a double border around the app's own rounded border. The standalone
+  window is therefore a layer-shell `PanelWindow` (no anchors, so
+  wlr-layer-shell centres it) — layer surfaces are not decorated — and
+  off-screen QA swaps in a `FloatingWindow` host because `PanelWindow` has no
+  backend without Wayland.
 - **Quickshell does not receive HTML colours in `property color`**; convert with
   `Qt.rgba()`/`Qt.color()`.
 - **A `Process` with `stdinEnabled` and `SplitParser`** is the proven way to run

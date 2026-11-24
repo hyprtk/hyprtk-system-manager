@@ -35,7 +35,7 @@ Item {
         anchors.centerIn: parent
         width: Math.min(460, parent.width - 80)
         implicitHeight: content.implicitHeight + 36
-        radius: Theme.radiusPanel
+        radius: Theme.radiusLg
         color: Qt.rgba(Theme.background.r, Theme.background.g, Theme.background.b,
                        Theme.panelOpacityStrong)
         border.width: 1

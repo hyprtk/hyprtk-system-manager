@@ -98,6 +98,11 @@ hyprtk-settings --page displays  # open a specific panel
 hyprtk-settings --overlay        # layer-shell panel (bar hand-off)
 ```
 
+The window is a layer-shell panel centred on the focused screen, like the
+bar's Settings and Quick Settings. Layer surfaces are not decorated by the
+compositor, so the app's animated accent border is the only edge — no second
+border, shadow or compositor rounding.
+
 Bind it in Hyprland:
 
 ```lua

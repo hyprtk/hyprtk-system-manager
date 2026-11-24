@@ -39,6 +39,10 @@ Rectangle {
     }
 
     color: Theme.alpha(Theme.background, 0.60)
+    // Match the panel's corner so the rail never paints a square corner outside
+    // the animated border (the bar's Settings sidebar does the same).
+    topLeftRadius: Theme.radiusLg
+    bottomLeftRadius: Theme.radiusLg
 
     Column {
         anchors.fill: parent

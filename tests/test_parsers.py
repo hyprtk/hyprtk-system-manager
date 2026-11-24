@@ -35,6 +35,7 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(mon["modes"][0]["label"], "3840×1080 @ 59.97 Hz")
         self.assertEqual(mon["vrr"], 1)
         self.assertEqual(mon["mirror"], "DP-2")
+        self.assertNotEqual(mon["mirror"], "none")
         self.assertEqual(mon["format"], "XRGB8888")
         self.assertEqual(mon["currentCm"], "srgb")
         self.assertEqual(len(mon["modes"]), 2)  # duplicate mode removed

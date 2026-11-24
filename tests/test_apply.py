@@ -351,6 +351,62 @@ class ApplyTests(unittest.TestCase):
             self.assertNotIn(input_panel.START, target.read_text())
             self.assertIn("-- base", target.read_text())
 
+    def test_input_apply_writes_the_block_and_reloads(self):
+        target = self.tmp / "input.lua"
+        original = "-- base\nhl.config({ input = {} })\n"
+        target.write_text(original)
+        calls = []
+
+        def fake(argv, **kwargs):
+            calls.append(argv)
+            if argv[:2] == ["hyprctl", "getoption"]:
+                values = {
+                    "input:kb_layout": "str: gb",
+                    "input:kb_variant": "str: ",
+                    "input:repeat_rate": "int: 25",
+                    "input:repeat_delay": "int: 600",
+                    "input:sensitivity": "float: 0",
+                    "input:accel_profile": "str: ",
+                    "input:touchpad:natural_scroll": "bool: false",
+                    "input:touchpad:tap-to-click": "bool: true",
+                    "input:touchpad:disable_while_typing": "bool: true",
+                }
+                return RunResult(0, values.get(argv[2], ""), "")
+            return RunResult(0, "ok", "")
+
+        with mock.patch.object(paths, "input_file", return_value=target), \
+             mock.patch.object(util, "run", side_effect=fake):
+            result = input_panel.apply({"repeat_rate": 31, "kb_layout": "de"})
+
+        self.assertTrue(result["ok"])
+        text = target.read_text()
+        self.assertIn(input_panel.START, text)
+        self.assertIn("repeat_rate = 31", text)
+        self.assertIn('kb_layout = "de"', text)
+        self.assertIn("tap-to-click\"] = true", text)
+        # No runtime keyword: the change must go through the file and a reload.
+        self.assertFalse(any(argv[:2] == ["hyprctl", "keyword"] for argv in calls))
+        self.assertIn(["hyprctl", "reload"], calls)
+
+    def test_input_apply_clamps_and_restores_on_rejection(self):
+        target = self.tmp / "input.lua"
+        original = "-- base\nhl.config({ input = {} })\n"
+
+        def fake(argv, **kwargs):
+            if argv[:2] == ["hyprctl", "getoption"]:
+                return RunResult(0, "int: 25", "")
+            if argv[:2] == ["hyprctl", "reload"]:
+                return RunResult(0, "unknown request", "")
+            return RunResult(0, "", "")
+
+        target.write_text(original)
+        with mock.patch.object(paths, "input_file", return_value=target), \
+             mock.patch.object(util, "run", side_effect=fake):
+            result = input_panel.apply({"repeat_rate": 0})
+        self.assertFalse(result["ok"])
+        self.assertIn("unknown request", result["message"])
+        self.assertEqual(target.read_text(), original)
+
     def test_input_persist_restores_on_reload_failure(self):
         target = self.tmp / "input.lua"
         original = "-- base\nhl.config({ input = {} })\n"

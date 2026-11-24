@@ -73,6 +73,38 @@ class ApplyTests(unittest.TestCase):
         self.assertIn("gtk-cursor-theme-size=28", gtk)
         self.assertTrue((self.tmp / ".icons" / "default" / "index.theme").is_file())
 
+    def test_appearance_theme_writes_both_representations(self):
+        # The bar reads the flat `themeAccent` override first and the nested
+        # `theme` block second; writing only one leaves them divergent.
+        with mock.patch.object(util, "which", return_value=None):
+            result = appearance.apply({"accent": "#ff0000", "source": "manual"})
+        self.assertTrue(result["ok"])
+        data = jsonconf.load()
+        self.assertEqual(data["themeAccent"], "#ff0000")
+        self.assertEqual(data["theme"]["accent"], "#ff0000")
+        self.assertEqual(data["themeSource"], "manual")
+        self.assertEqual(data["theme"]["source"], "manual")
+
+    def test_appearance_pywal_clears_colour_overrides(self):
+        with mock.patch.object(util, "which", return_value=None):
+            appearance.apply({"accent": "#ff0000", "source": "manual"})
+            appearance.apply({"source": "pywal"})
+        data = jsonconf.load()
+        self.assertEqual(data["themeSource"], "pywal")
+        self.assertEqual(data["themeAccent"], "")
+        self.assertEqual(data["themeBackground"], "")
+        # The nested block keeps the last manual palette for a later switch back.
+        self.assertEqual(data["theme"]["accent"], "#ff0000")
+
+    def test_appearance_probe_prefers_the_flat_override(self):
+        jsonconf.patch({"themeAccent": "#00ff00",
+                        "theme": {"accent": "#ff0000", "source": "manual"}})
+        with mock.patch.object(util, "which", return_value=None):
+            page = appearance.probe()
+        rows = {row.get("key"): row for section in page["sections"]
+                for row in section["rows"]}
+        self.assertEqual(rows["accent"]["value"], "#00ff00")
+
     def test_appearance_clamps_opacity(self):
         appearance.apply({"opacity": 5})
         self.assertEqual(jsonconf.load()["opacity"], 1.0)

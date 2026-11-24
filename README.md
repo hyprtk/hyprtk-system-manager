@@ -34,7 +34,7 @@ hyprtk applications sitting next to them.
 hyprtk-system-manager borrows the good parts and drops the rest:
 
 - **One window, one page stack, one apply model.** Grouped sidebar, global
-  search, pending-change footer, explicit Apply/Revert.
+  row-level search with recents, pending-change footer, explicit Apply/Revert.
 - **Declared panels, one renderer.** A panel is a Python module that returns a
   JSON form model; `FormPage.qml` renders the twelve row types. Bespoke QML is
   reserved for genuinely spatial pages (monitors, accounts).
@@ -139,7 +139,7 @@ hyprtk-settings backups restore 20261123-163000-123
 ## Development
 
 ```sh
-make test    # 62 unit tests
+make test    # 76 unit tests
 make doctor  # probe every panel on this machine
 make qa      # tests + compile + qmllint + off-screen boot + installer round-trip
 ```

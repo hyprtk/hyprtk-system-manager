@@ -1,11 +1,23 @@
+import io
+import json
+import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
+from unittest import mock
 
-from system_manager import paths, rpc
+from system_manager import form, paths, rpc
 
 
 class RpcTests(unittest.TestCase):
+    def setUp(self):
+        with rpc._CACHE_LOCK:
+            rpc._CACHE.clear()
+        with rpc._WARM_LOCK:
+            rpc._WARM["started"] = False
+            rpc._WARM["running"] = False
+
     def test_unknown_method(self):
         response = rpc.handle({"id": 1, "method": "nope"})
         self.assertEqual(response["id"], 1)
@@ -53,6 +65,76 @@ class RpcTests(unittest.TestCase):
         finally:
             rpc.HANDLERS.pop("boom", None)
         self.assertIn("RuntimeError: kaboom", response["error"])
+
+    def test_ui_set_tracks_recent_pages(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            saved = paths.UI_STATE
+            paths.UI_STATE = Path(tmp) / "ui.json"
+            try:
+                rpc.handle({"id": 10, "method": "ui.set", "params": {"values": {"last_page": "fonts"}}})
+                rpc.handle({"id": 11, "method": "ui.set", "params": {"values": {"last_page": "users"}}})
+                rpc.handle({"id": 12, "method": "ui.set", "params": {"values": {"last_page": "fonts"}}})
+                response = rpc.handle({"id": 13, "method": "ui.get"})
+                self.assertEqual(response["result"]["recent"], ["fonts", "users"])
+                self.assertEqual(response["result"]["last_page"], "fonts")
+            finally:
+                paths.UI_STATE = saved
+
+    def test_search_matches_cached_rows(self):
+        model = form.page(
+            id="input", title="Input Devices", group="hardware", icon="\uf11c",
+            status="live", sections=[form.section("Touchpad", [
+                form.toggle("tap", "Tap to click", True),
+                form.slider("sensitivity", "Mouse sensitivity", 0, minimum=-1, maximum=1),
+            ])],
+        )
+        fake = mock.Mock(probe=lambda: model)
+        with mock.patch.object(rpc.catalog, "module_for", return_value=fake):
+            rpc.handle({"id": 20, "method": "panel", "params": {"id": "input"}})
+        response = rpc.handle({"id": 21, "method": "search", "params": {"query": "tap"}})
+        results = response["result"]["results"]
+        self.assertTrue(results)
+        self.assertEqual(results[0]["id"], "input")
+        self.assertIn("Tap to click", results[0]["matches"])
+        self.assertTrue(response["result"]["indexed"] >= 1)
+
+    def test_search_matches_rows_without_catalog_hit(self):
+        model = form.page(
+            id="input", title="Input Devices", group="hardware", icon="\uf11c",
+            status="live", sections=[form.section("Touchpad", [
+                form.toggle("tap", "Tap to click", True),
+            ])],
+        )
+        with rpc._CACHE_LOCK:
+            rpc._CACHE["input"] = (time.time(), model)
+        response = rpc.handle({"id": 22, "method": "search", "params": {"query": "click"}})
+        self.assertEqual(response["result"]["results"][0]["id"], "input")
+
+    def test_search_empty_query(self):
+        response = rpc.handle({"id": 23, "method": "search", "params": {"query": "  "}})
+        self.assertEqual(response["result"]["results"], [])
+
+    def test_serve_answers_out_of_order(self):
+        def slow(params):
+            time.sleep(0.25)
+            return {"ok": True}
+
+        def fast(params):
+            return {"ok": True}
+
+        rpc.HANDLERS["slow-test"] = slow
+        rpc.HANDLERS["fast-test"] = fast
+        source = io.StringIO('{"id": 1, "method": "slow-test"}\n{"id": 2, "method": "fast-test"}\n')
+        sink = io.StringIO()
+        try:
+            with mock.patch.object(sys, "stdin", source), mock.patch.object(sys, "stdout", sink):
+                rpc.serve()
+        finally:
+            rpc.HANDLERS.pop("slow-test", None)
+            rpc.HANDLERS.pop("fast-test", None)
+        ids = [json.loads(line)["id"] for line in sink.getvalue().splitlines() if line.strip()]
+        self.assertEqual(ids[0], 2)
+        self.assertEqual(sorted(ids), [1, 2])
 
     def test_panel_contract_is_valid(self):
         response = rpc.handle({"id": 9, "method": "panel", "params": {"id": "datetime"}})

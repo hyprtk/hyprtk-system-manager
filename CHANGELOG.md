@@ -1,5 +1,23 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- **The RPC server is threaded.** Panel probes no longer run one at a time, so
+  a slow probe (Updates can spend a minute in `checkupdates`) cannot freeze the
+  rest of the window; apply/action calls stay serialised.
+- **Search now finds settings, not just panels.** A background index warms the
+  panel probes after startup and matches row labels (`Tap to click`, `Rotation`,
+  `Default sink`, …). Results show the matched setting and re-run while the
+  index finishes warming.
+- **Recent panels** sit above the categories in the sidebar and persist in
+  `ui.json`.
+
+### Added
+
+- 76 tests: out-of-order RPC responses, cached-row search, recent-page state.
+
 All notable changes to hyprtk-system-manager are recorded here. The format is
 loosely [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions are
 independent of the suite tag that carries them.

@@ -131,7 +131,7 @@ PANELS: list[dict[str, Any]] = [
         "status": "partial", "module": "network",
         "keywords": ["network", "wifi", "wi-fi", "wireless", "ethernet", "vpn",
                      "connection", "nmcli", "networkmanager", "ip", "dns", "proxy"],
-        "description": "Connections, Wi-Fi networks and radio state.",
+        "description": "Wi-Fi networks, saved connections and radio state.",
     },
 
     # ── Personalisation ─────────────────────────────────────────────────

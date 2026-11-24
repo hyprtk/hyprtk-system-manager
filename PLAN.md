@@ -287,7 +287,7 @@ otherwise            → pkexec <cmd>        (polkit agent prompts)
 
 ### M1 — depth
 
-- [ ] Network: connect flow with a password dialog, VPN page
+- [x] Network: join/forget/disconnect Wi-Fi with a password dialog (VPN page still open)
 - [x] Sound: input volume/mute + per-app streams (device profiles still open)
 - [x] Users: groups and shell dialogs
 - [x] Fonts: install picker

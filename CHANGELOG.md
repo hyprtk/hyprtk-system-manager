@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- **Network**: join Wi-Fi networks (secured ones prompt for the password),
+  disconnect or forget saved connections, and toggle/rescan the radio. The
+  password is handed to `nmcli connection up ... passwd-file` through a private
+  `0600` file, never in argv or the action result.
+- 83 tests: connection listing, password-file content/mode, failure cleanup.
+
 ## [0.2.0] — 2026-11-24
 
 ### Changed

@@ -6,7 +6,8 @@ from unittest import mock
 
 from system_manager import jsonconf, paths, priv, util
 from system_manager.panels import (
-    appearance, datetime, displays, fonts, notifications, sound, suite, users,
+    appearance, datetime, displays, fonts, network, notifications, sound,
+    suite, users,
 )
 from system_manager.util import RunResult
 
@@ -151,6 +152,76 @@ class ApplyTests(unittest.TestCase):
             self.assertTrue(result["ok"])
             self.assertTrue((self.tmp / "fonts" / "TestFont.ttf").is_file())
             runner.assert_called()
+
+    def test_connect_open_network_has_no_password(self):
+        calls = []
+
+        def fake(argv, **kwargs):
+            calls.append(argv)
+            return RunResult(0, "", "")
+
+        with mock.patch.object(util, "which", return_value="/usr/bin/nmcli"), \
+             mock.patch.object(network, "_saved", return_value=[]), \
+             mock.patch.object(util, "run", side_effect=fake):
+            result = network.action("network.connect", {
+                "ssid": "Cafe", "security": "", "device": "wlp6s0"})
+        self.assertTrue(result["ok"])
+        self.assertFalse(any("passwd-file" in argv for argv in calls))
+        self.assertFalse(any("wifi-sec.key-mgmt" in argv for argv in calls))
+
+    def test_connect_secured_uses_private_passwd_file(self):
+        seen = {}
+        calls = []
+
+        def fake(argv, **kwargs):
+            calls.append(argv)
+            if "passwd-file" in argv:
+                path = argv[argv.index("passwd-file") + 1]
+                seen["content"] = Path(path).read_text()
+                seen["mode"] = oct(Path(path).stat().st_mode & 0o777)
+            return RunResult(0, "", "")
+
+        with mock.patch.object(util, "which", return_value="/usr/bin/nmcli"), \
+             mock.patch.object(network, "_saved", return_value=[]), \
+             mock.patch.dict(os.environ, {"XDG_RUNTIME_DIR": str(self.tmp)}), \
+             mock.patch.object(util, "run", side_effect=fake):
+            result = network.action("network.connect", {
+                "ssid": "Cafe", "security": "WPA2", "device": "wlp6s0",
+                "password": "s3cret",
+            })
+        self.assertTrue(result["ok"])
+        self.assertEqual(seen["content"], "802-11-wireless-security.psk:s3cret\n")
+        self.assertEqual(seen["mode"], "0o600")
+        for argv in calls:
+            self.assertNotIn("s3cret", argv)
+        self.assertEqual(list(self.tmp.glob("hyprtk-wifi-*")), [])
+
+    def test_connect_failure_removes_new_profile(self):
+        calls = []
+
+        def fake(argv, **kwargs):
+            calls.append(argv)
+            if "delete" in argv:
+                return RunResult(0, "", "")
+            if "up" in argv:
+                return RunResult(1, "", "denied")
+            return RunResult(0, "", "")
+
+        with mock.patch.object(util, "which", return_value="/usr/bin/nmcli"), \
+             mock.patch.object(network, "_saved", return_value=[]), \
+             mock.patch.object(util, "run", side_effect=fake):
+            result = network.action("network.connect", {
+                "ssid": "Cafe", "security": "", "device": "wlp6s0"})
+        self.assertFalse(result["ok"])
+        self.assertTrue(any(argv[:4] == ["nmcli", "connection", "delete", "id"] for argv in calls))
+
+    def test_forget_connection(self):
+        calls = []
+        with mock.patch.object(util, "which", return_value="/usr/bin/nmcli"), \
+             mock.patch.object(util, "run", side_effect=lambda argv, **kw: calls.append(argv) or RunResult(0)):
+            result = network.action("network.forget", {"name": "Cafe"})
+        self.assertTrue(result["ok"])
+        self.assertEqual(calls[0], ["nmcli", "connection", "delete", "id", "Cafe"])
 
     def test_displays_persist_writes_managed_block(self):
         target = self.tmp / "monitors.lua"

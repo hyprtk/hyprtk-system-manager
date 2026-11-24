@@ -85,6 +85,12 @@ class ParserTests(unittest.TestCase):
         wifi = network.parse_wifi("*:HomeNet:82:WPA2\n :OtherNet:41:WPA2\n")
         self.assertTrue(wifi[0]["active"])
         self.assertEqual(wifi[0]["signal"], 82)
+        self.assertEqual(wifi[0]["security"], "WPA2")
+        connections = network.parse_connections(
+            "HomeNet:wifi:wlp6s0\nCafe:wifi:\nWired:ethernet:enp7s0\n")
+        self.assertEqual([c["name"] for c in connections], ["HomeNet", "Cafe"])
+        self.assertTrue(connections[0]["active"])
+        self.assertFalse(connections[1]["active"])
 
     def test_lsblk(self):
         payload = {"blockdevices": [

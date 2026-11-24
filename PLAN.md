@@ -288,7 +288,9 @@ otherwise            → pkexec <cmd>        (polkit agent prompts)
 ### M1 — depth
 
 - [ ] Network: connect flow with a password dialog, VPN page
-- [ ] Sound: per-app volumes, device profiles
+- [x] Sound: input volume/mute + per-app streams (device profiles still open)
+- [x] Users: groups and shell dialogs
+- [x] Fonts: install picker
 - [ ] Power: `powerprofilesctl`/`tlp` when present, lid/battery actions
 - [ ] Displays: drag-to-arrange canvas, VRR/HDR/bit-depth, profiles
 - [x] Search: row-level index + recents (suggested settings still open)

@@ -5,7 +5,9 @@ from pathlib import Path
 from unittest import mock
 
 from system_manager import jsonconf, paths, priv, util
-from system_manager.panels import appearance, datetime, displays, notifications, suite
+from system_manager.panels import (
+    appearance, datetime, displays, fonts, notifications, sound, suite, users,
+)
 from system_manager.util import RunResult
 
 
@@ -104,6 +106,51 @@ class ApplyTests(unittest.TestCase):
         argv = runner.call_args[0][0]
         self.assertEqual(argv[:3], ["hyprctl", "keyword", "monitor"])
         self.assertEqual(argv[3], "DP-1,1920x1080@60.00,0x0,1,0")
+
+    def test_sound_apply_input_and_streams(self):
+        calls = []
+
+        def fake(argv, **kwargs):
+            calls.append(argv)
+            return RunResult(0, "", "")
+
+        with mock.patch.object(util, "which", return_value="/usr/bin/wpctl"), \
+             mock.patch.object(util, "run", side_effect=fake):
+            result = sound.apply({
+                "input_volume": 40, "input_muted": True,
+                "stream.75.volume": 60, "stream.75.muted": True,
+            })
+        self.assertTrue(result["ok"])
+        self.assertIn(["wpctl", "set-volume", "@DEFAULT_AUDIO_SOURCE@", "40%"], calls)
+        self.assertIn(["wpctl", "set-mute", "@DEFAULT_AUDIO_SOURCE@", "1"], calls)
+        self.assertIn(["wpctl", "set-volume", "75", "60%"], calls)
+        self.assertIn(["wpctl", "set-mute", "75", "1"], calls)
+
+    def test_users_groups_and_shell_actions(self):
+        calls = []
+
+        def fake(argv, **kwargs):
+            calls.append(argv)
+            return RunResult(0, "", "")
+
+        with mock.patch.object(priv, "run_priv", side_effect=fake), \
+             mock.patch.object(users, "shells", return_value=["/bin/sh", "/bin/zsh"]):
+            groups = users.action("users.groups", {"username": "kori", "groups": "wheel,audio"})
+            shell = users.action("users.shell", {"username": "kori", "shell": "/bin/zsh"})
+        self.assertTrue(groups["ok"])
+        self.assertTrue(shell["ok"])
+        self.assertIn(["usermod", "--groups", "wheel,audio", "kori"], calls)
+        self.assertIn(["usermod", "--shell", "/bin/zsh", "kori"], calls)
+
+    def test_fonts_install_copies_and_refreshes(self):
+        with mock.patch.object(paths, "FONTS_DIR", self.tmp / "fonts"):
+            source = self.tmp / "TestFont.ttf"
+            source.write_bytes(b"not a real font")
+            with mock.patch.object(util, "run", return_value=RunResult(0, "", "")) as runner:
+                result = fonts.action("fonts.install", {"path": str(source)})
+            self.assertTrue(result["ok"])
+            self.assertTrue((self.tmp / "fonts" / "TestFont.ttf").is_file())
+            runner.assert_called()
 
     def test_displays_persist_writes_managed_block(self):
         target = self.tmp / "monitors.lua"

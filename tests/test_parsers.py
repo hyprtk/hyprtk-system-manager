@@ -61,11 +61,18 @@ class ParserTests(unittest.TestCase):
             " │      61. HDMI Digital Stereo [vol: 0.40]\n"
             " ├─ Sources:\n"
             " │      46. Realtek USB MIC Mono [vol: 1.00]\n"
+            " └─ Streams:\n"
+            "        75. cava\n"
+            "             76. input_FL        < ALCS1200A Analog:monitor_FL\t[active]\n"
+            "        96. Brave\n"
+            "             97. output_FL       > ALCS1200A Analog:playback_FL\t[active]\n"
         )
         self.assertEqual([s["id"] for s in parsed["sinks"]], [34, 61])
         self.assertTrue(parsed["sinks"][0]["default"])
         self.assertEqual(parsed["sinks"][1]["volume"], "0.40")
         self.assertEqual(parsed["sources"][0]["name"], "Realtek USB MIC Mono")
+        self.assertEqual([stream["id"] for stream in parsed["streams"]], [75, 96])
+        self.assertEqual(parsed["streams"][1]["name"], "Brave")
 
     def test_nmcli(self):
         devices = network.parse_devices(

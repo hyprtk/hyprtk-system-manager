@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.2.0] — 2026-11-24
 
 ### Changed
 
@@ -16,7 +16,15 @@
 
 ### Added
 
-- 76 tests: out-of-order RPC responses, cached-row search, recent-page state.
+- **Sound**: default **input** volume and mute, plus **per-application
+  streams** — each active PipeWire stream gets a volume slider and a mute
+  toggle, written with `wpctl set-volume`/`set-mute`.
+- **Users**: **Groups** and **Shell** dialogs per account, wired to the existing
+  `usermod --groups` / `usermod --shell` actions.
+- **Fonts**: **Install a font…** opens the file picker and copies the chosen
+  `.ttf/.otf/.ttc/.woff` into `~/.local/share/fonts`, then refreshes the cache.
+- 79 tests: out-of-order RPC responses, cached-row search, recent-page state,
+  stream parsing and privilege commands, font install.
 
 All notable changes to hyprtk-system-manager are recorded here. The format is
 loosely [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions are

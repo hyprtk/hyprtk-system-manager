@@ -1,4 +1,5 @@
 import unittest
+from unittest import mock
 
 from system_manager.panels import (
     bluetooth, datetime, displays, input as input_panel, network, printers,
@@ -17,6 +18,8 @@ MONITOR_FIXTURE = [{
     "transform": 0,
     "vrr": 1,
     "mirrorOf": "DP-2",
+    "currentFormat": "XRGB8888",
+    "colorManagementPreset": "srgb",
     "disabled": False,
     "availableModes": ["3840x1080@59.97Hz", "1920x1080@60.00Hz", "1920x1080@60.00Hz"],
 }]
@@ -32,6 +35,8 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(mon["modes"][0]["label"], "3840×1080 @ 59.97 Hz")
         self.assertEqual(mon["vrr"], 1)
         self.assertEqual(mon["mirror"], "DP-2")
+        self.assertEqual(mon["format"], "XRGB8888")
+        self.assertEqual(mon["currentCm"], "srgb")
         self.assertEqual(len(mon["modes"]), 2)  # duplicate mode removed
         self.assertEqual(displays.parse_monitors("nope"), [])
 
@@ -78,6 +83,43 @@ class ParserTests(unittest.TestCase):
         self.assertEqual([stream["id"] for stream in parsed["streams"]], [75, 96])
         self.assertEqual(parsed["streams"][1]["name"], "Brave")
 
+    def test_vpn_plugin_detection(self):
+        # WireGuard is built into NetworkManager; OpenVPN needs a plugin file.
+        import tempfile
+        from pathlib import Path
+        self.assertEqual(network.vpn_plugin("wireguard"), "built-in")
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            with mock.patch.object(network, "VPN_PLUGIN_DIRS", (str(root / "VPN"),)), \
+                 mock.patch.object(network, "PLUGIN_ROOT", root):
+                self.assertEqual(network.vpn_plugin("openvpn"), "")
+                (root / "VPN").mkdir()
+                (root / "VPN" / "nm-openvpn-service.name").write_text("x")
+                self.assertTrue(network.vpn_plugin("openvpn").endswith("nm-openvpn-service.name"))
+
+    def test_pactl_cards(self):
+        parsed = sound.parse_cards(
+            "Card #49\n"
+            "\tName: alsa_card.pci-0000_0d_00.1\n"
+            "\tProperties:\n"
+            "\t\tdevice.description = \"Navi 21/23 HDMI/DP Audio Controller\"\n"
+            "\tProfiles:\n"
+            "\t\toff: Off (sinks: 0, sources: 0, priority: 0, available: yes)\n"
+            "\t\toutput:hdmi-stereo: Digital Stereo (HDMI) Output (sinks: 1, sources: 0, priority: 5900, available: yes)\n"
+            "\t\toutput:hdmi-stereo-extra1: Digital Stereo (HDMI 2) Output (sinks: 1, sources: 0, priority: 0, available: no)\n"
+            "\tActive Profile: output:hdmi-stereo\n"
+            "\tPorts:\n"
+        )
+        self.assertEqual(len(parsed), 1)
+        card = parsed[0]
+        self.assertEqual(card["name"], "alsa_card.pci-0000_0d_00.1")
+        self.assertEqual(card["description"], "Navi 21/23 HDMI/DP Audio Controller")
+        self.assertEqual(card["active"], "output:hdmi-stereo")
+        self.assertEqual([p["id"] for p in card["profiles"]],
+                         ["off", "output:hdmi-stereo", "output:hdmi-stereo-extra1"])
+        self.assertEqual(card["profiles"][1]["label"], "Digital Stereo (HDMI) Output")
+        self.assertFalse(card["profiles"][2]["available"])
+
     def test_nmcli(self):
         devices = network.parse_devices(
             "enp7s0:ethernet:connected:Wired connection 1\n"
@@ -95,6 +137,11 @@ class ParserTests(unittest.TestCase):
         self.assertEqual([c["name"] for c in connections], ["HomeNet", "Cafe"])
         self.assertTrue(connections[0]["active"])
         self.assertFalse(connections[1]["active"])
+        self.assertEqual(connections[0]["type"], "wifi")
+        vpn = network.parse_connections("Work:vpn:\nWG:wireguard:\nHome:wifi:\n",
+                                        kinds=("vpn", "wireguard"))
+        self.assertEqual([item["name"] for item in vpn], ["Work", "WG"])
+        self.assertEqual(vpn[1]["type"], "wireguard")
 
     def test_lsblk(self):
         payload = {"blockdevices": [

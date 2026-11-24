@@ -113,13 +113,16 @@ class ApplyTests(unittest.TestCase):
              mock.patch.object(util, "run", return_value=RunResult(0, "", "")) as runner:
             result = displays.action("displays.apply", {
                 "name": "DP-1", "mode": "1920x1080@60.00", "scale": 1,
-                "transform": 0, "vrr": 1, "mirror": "DP-2", "x": 0, "y": 0,
+                "transform": 0, "vrr": 1, "mirror": "DP-2",
+                "bitdepth": "10", "cm": "hdr", "x": 0, "y": 0,
             })
         self.assertTrue(result["ok"])
         text = target.read_text()
         self.assertIn('mode = "1920x1080@60.00"', text)
         self.assertIn("vrr = 1", text)
         self.assertIn('mirror = "DP-2"', text)
+        self.assertIn("bitdepth = 10", text)
+        self.assertIn('cm = "hdr"', text)
         self.assertTrue(any(call[0][0][:2] == ["hyprctl", "reload"]
                             for call in runner.call_args_list))
 
@@ -162,6 +165,21 @@ class ApplyTests(unittest.TestCase):
         self.assertIn(["wpctl", "set-mute", "@DEFAULT_AUDIO_SOURCE@", "1"], calls)
         self.assertIn(["wpctl", "set-volume", "75", "60%"], calls)
         self.assertIn(["wpctl", "set-mute", "75", "1"], calls)
+
+    def test_sound_card_profile(self):
+        calls = []
+
+        def fake(argv, **kwargs):
+            calls.append(argv)
+            return RunResult(0, "", "")
+
+        with mock.patch.object(util, "which", return_value="/usr/bin/wpctl"), \
+             mock.patch.object(util, "run", side_effect=fake):
+            result = sound.apply({
+                "card::alsa_card.pci-0000_0d_00.1::profile": "off",
+            })
+        self.assertTrue(result["ok"])
+        self.assertIn(["pactl", "set-card-profile", "alsa_card.pci-0000_0d_00.1", "off"], calls)
 
     def test_users_groups_and_shell_actions(self):
         calls = []
@@ -251,6 +269,41 @@ class ApplyTests(unittest.TestCase):
         self.assertFalse(result["ok"])
         self.assertTrue(any(argv[:4] == ["nmcli", "connection", "delete", "id"] for argv in calls))
 
+    def test_vpn_import_requires_the_plugin(self):
+        path = self.tmp / "office.ovpn"
+        path.write_text("client\n")
+        with mock.patch.object(network, "vpn_plugin", return_value=""), \
+             mock.patch.object(util, "run") as runner:
+            result = network.action("network.vpn_import", {"path": str(path)})
+        self.assertFalse(result["ok"])
+        self.assertIn("OpenVPN", result["message"])
+        runner.assert_not_called()
+
+    def test_vpn_import_type_by_suffix(self):
+        for suffix, kind in (("ovpn", "openvpn"), ("conf", "wireguard")):
+            path = self.tmp / f"office.{suffix}"
+            path.write_text("x")
+            calls = []
+            with mock.patch.object(util, "which", return_value="/usr/bin/nmcli"), \
+                 mock.patch.object(network, "vpn_plugin", return_value="built-in"), \
+                 mock.patch.object(util, "run",
+                                   side_effect=lambda argv, **kw: calls.append(argv) or RunResult(0)):
+                result = network.action("network.vpn_import", {"path": str(path)})
+            self.assertTrue(result["ok"], suffix)
+            self.assertIn(["nmcli", "connection", "import", "type", kind, "file", str(path)], calls)
+
+    def test_vpn_actions(self):
+        calls = []
+        with mock.patch.object(util, "which", return_value="/usr/bin/nmcli"), \
+             mock.patch.object(util, "run",
+                               side_effect=lambda argv, **kw: calls.append(argv) or RunResult(0)):
+            network.action("network.vpn_connect", {"name": "Work"})
+            network.action("network.vpn_disconnect", {"name": "Work"})
+            network.action("network.vpn_forget", {"name": "Work"})
+        self.assertIn(["nmcli", "--wait", "30", "connection", "up", "id", "Work"], calls)
+        self.assertIn(["nmcli", "connection", "down", "id", "Work"], calls)
+        self.assertIn(["nmcli", "connection", "delete", "id", "Work"], calls)
+
     def test_forget_connection(self):
         calls = []
         with mock.patch.object(util, "which", return_value="/usr/bin/nmcli"), \
@@ -334,7 +387,8 @@ class ApplyTests(unittest.TestCase):
              mock.patch.object(util, "run", return_value=RunResult(0, "", "")):
             result = displays.action("displays.persist", {"monitors": [
                 {"name": "DP-1", "mode": "1920x1080@60.00", "scale": 1,
-                 "transform": 0, "vrr": 1, "mirror": "DP-2", "x": 0, "y": 0},
+                 "transform": 0, "vrr": 1, "mirror": "DP-2",
+                 "bitdepth": "10", "cm": "hdr", "x": 0, "y": 0},
             ]})
         self.assertTrue(result["ok"])
         text = target.read_text()
@@ -343,6 +397,8 @@ class ApplyTests(unittest.TestCase):
         self.assertIn('output = "DP-1"', text)
         self.assertIn("vrr = 1", text)
         self.assertIn('mirror = "DP-2"', text)
+        self.assertIn("bitdepth = 10", text)
+        self.assertIn('cm = "hdr"', text)
         self.assertIn("hl.monitor({ output = \"\", mode = \"preferred\" })", text)
 
         with mock.patch.object(paths, "monitors_file", return_value=target), \

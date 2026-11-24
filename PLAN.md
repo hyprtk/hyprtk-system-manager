@@ -287,23 +287,28 @@ otherwise            → pkexec <cmd>        (polkit agent prompts)
 
 ### M1 — depth
 
-- [x] Network: join/forget/disconnect Wi-Fi with a password dialog (VPN page still open)
-- [x] Sound: input volume/mute + per-app streams (device profiles still open)
+- [x] Network: join/forget/disconnect Wi-Fi with a password dialog, VPN list +
+      .ovpn/.conf import (plugin detection first)
+- [x] Sound: input volume/mute, per-app streams, card profiles
 - [x] Users: groups and shell dialogs
 - [x] Input: persist the exposed settings to input.lua (managed block)
 - [x] Fonts: install picker
 - [ ] Power: `powerprofilesctl`/`tlp` when present, lid/battery actions
-- [ ] Displays: HDR/bit-depth, profiles (drag/VRR/mirror done)
-- [x] Search: row-level index + recents (suggested settings still open)
+- [x] Displays: drag/VRR/mirror, bit depth and colour management (presets only;
+      no saved per-monitor profiles yet)
+- [x] Search: row-level index, recents, suggested group in the sidebar
 - [x] Non-blocking RPC: panel probes run on a thread pool so a slow Updates
       probe cannot freeze the UI
 
 ### M2 — breadth
 
-- [ ] Accessibility panel: Orca, on-screen keyboard, sticky keys, zoom
-- [ ] Printers: add/remove queue
+- [x] Accessibility: text scaling/contrast/motion, keyboard aids (stored, daemon
+      state reported), Orca and on-screen-keyboard availability + launch
+- [x] Printers: add (lpadmin, device + driverless), remove, default, test page,
+      CUPS web interface
 - [ ] Storage: format/mount policies, fstab editor with validation
-- [ ] Region: full locale generation, input methods
+- [x] Region: locale generation (`/etc/locale.gen` + `locale-gen` in one
+      privileged call), console keymap (input methods still open)
 - [ ] Privacy: firewall rules, per-app permissions
 
 ### M3 — suite

@@ -46,6 +46,7 @@ def place_window(timeout: float = 10.0) -> int:
                 dispatch('hl.dsp.window.resize({ x = %d, y = %d, window = "address:%s" })'
                          % (WINDOW[0], WINDOW[1], addr))
             dispatch('hl.dsp.window.center({ window = "address:%s" })' % addr)
+            dispatch('hl.dsp.window.set_prop({ prop = "border_size", value = "0", window = "address:%s" })' % addr)
             dispatch('hl.dsp.window.set_prop({ prop = "opacity", value = "1.0", window = "address:%s" })' % addr)
             dispatch('hl.dsp.window.set_prop({ prop = "opacity_inactive", value = "1.0", window = "address:%s" })' % addr)
             return 0

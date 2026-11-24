@@ -32,6 +32,7 @@ FloatingWindow {
                 addr = "0x" + addr;
             Hyprland.dispatch('hl.dsp.window.float({ window = "address:' + addr + '", action = "enable" })');
             Hyprland.dispatch('hl.dsp.window.center({ window = "address:' + addr + '" })');
+            Hyprland.dispatch('hl.dsp.window.set_prop({ prop = "border_size", value = "0", window = "address:' + addr + '" })');
             Hyprland.dispatch('hl.dsp.window.set_prop({ prop = "opacity", value = "1.0", window = "address:' + addr + '" })');
             Hyprland.dispatch('hl.dsp.window.set_prop({ prop = "opacity_inactive", value = "1.0", window = "address:' + addr + '" })');
             win.selfFloated = true;

@@ -59,6 +59,13 @@ First scaffold: the whole application shape plus eight functional panels.
   pass, off-screen boot check for one page of each kind, installer round-trip,
   and a deterministic off-screen screenshot tool.
 
+### Fixed
+
+- The window showed a double border: Hyprland's 2px compositor border plus the
+  app's animated accent border. The `place` helper now sets `border_size = 0`
+  for our window on launch (and the QML float path does the same), leaving a
+  single border — the same as the bar's layer-shell dialogs.
+
 ### Changed
 
 - **Retheme to the bar-qt dialog language.** Every surface now uses the exact

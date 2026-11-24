@@ -63,8 +63,9 @@ First scaffold: the whole application shape plus eight functional panels.
 
 - The window showed a double border: Hyprland's 2px compositor border plus the
   app's animated accent border. The `place` helper now sets `border_size = 0`
-  for our window on launch (and the QML float path does the same), leaving a
-  single border — the same as the bar's layer-shell dialogs.
+  and `no_shadow = 1` for our window on launch (and the QML float path does the
+  same), leaving one border and no drop-shadow halo — the same flat edge as the
+  bar's layer-shell dialogs.
 
 ### Changed
 

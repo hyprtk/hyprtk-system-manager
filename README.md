@@ -1,3 +1,13 @@
+<div align="center">
+
+<img src="docs/branding/banner.png" alt="hyprtk-system-manager — part of the hyprtk suite" width="100%" />
+
+[![suite](https://img.shields.io/badge/suite-hyprtk-02DEDE?style=flat-square&labelColor=05060B)](https://github.com/hyprtk)
+[![version](https://img.shields.io/badge/version-0.1.0-FD4FB6?style=flat-square&labelColor=05060B)](CHANGELOG.md)
+[![license](https://img.shields.io/badge/license-MIT-5FB8F5?style=flat-square&labelColor=05060B)](LICENSE)
+
+</div>
+
 # hyprtk-system-manager
 
 > **Part of the hyprtk suite** — [dotfiles](https://github.com/hyprtk/dotfiles) ·

@@ -46,9 +46,12 @@ def probe() -> dict:
                 "args": {"id": app["id"]},
             })
         badges = ["running"] if app["running"] else []
+        subtitle = f"{app['name']} {app['version'] or '—'} · {app['binary']}"
+        if app.get("settings_hint"):
+            subtitle += f" · {app['settings_hint']}"
         items.append({
             "title": app["title"],
-            "subtitle": f"{app['name']} {app['version'] or '—'} · {app['binary']}",
+            "subtitle": subtitle,
             "badges": badges, "actions": actions,
         })
 

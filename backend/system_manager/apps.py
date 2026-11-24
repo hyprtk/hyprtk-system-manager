@@ -1,14 +1,17 @@
 """Installed hyprtk applications: version, liveness and settings entry points.
 
 Versions are read from the installed payload (never from ``--version``, because
-the Quickshell apps forward that flag to ``qs``). Paths cover both the current
-layout and the older one where the bar backend lived in the Quickshell config.
+the Quickshell apps forward that flag to ``qs``). The USB writer ships as a
+zipapp and the ISO creator only as a venv install, so both need their own
+lookup path.
 """
 
 from __future__ import annotations
 
+import glob as globmod
 import os
 import re
+import zipfile
 from pathlib import Path
 
 from . import util
@@ -36,21 +39,24 @@ APPS = [
         "id": "file-manager", "name": "hyprtk-file-manager", "title": "Files",
         "binary": "hyprtk-fm",
         "version_files": [_p("hyprtk-file-manager/backend/hyprtk_file_manager/__init__.py")],
-        "settings": ["hyprtk-fm", "--settings"],
+        "settings": [],
+        "settings_hint": "Ctrl+, in the app",
         "process": r"hyprtk-fm|qs\b.*hyprtk-file-manager",
     },
     {
         "id": "term", "name": "hyprtk-term", "title": "Terminal",
         "binary": "hyprtk-term",
         "version_files": [_p("hyprtk-term/hyprtk_term/__init__.py")],
-        "settings": ["hyprtk-term", "--settings"],
+        "settings": [],
+        "settings_hint": "Ctrl+, in the app",
         "process": r"hyprtk-term",
     },
     {
         "id": "editor", "name": "hyprtk-editor", "title": "Text Editor",
         "binary": "hyprtk-edit",
         "version_files": [_p("hyprtk-editor/hyprtk_editor/__init__.py")],
-        "settings": ["hyprtk-edit", "--preferences"],
+        "settings": [],
+        "settings_hint": "Ctrl+, in the app",
         "process": r"hyprtk-edit",
     },
     {
@@ -84,14 +90,20 @@ APPS = [
     {
         "id": "usb", "name": "hyprtk-usb", "title": "USB Writer",
         "binary": "hyprtk-usb",
-        "version_files": [_p("hyprtk-usb/hyprtk_usb/__init__.py")],
+        "version_files": [],
+        # Installed as a zipapp; read the package metadata without importing it.
+        "version_zip": {"path": HOME / ".local" / "bin" / "hyprtk-usb",
+                        "member": "hyprtk_usb/__init__.py"},
         "settings": [],
         "process": r"hyprtk-usb",
     },
     {
         "id": "iso", "name": "hyprtk-iso-creator", "title": "ISO Creator",
         "binary": "hyprtk-iso-creator",
-        "version_files": [_p("hyprtk-iso-creator/hyprtk_iso_creator/__init__.py")],
+        "version_files": [],
+        "version_globs": [
+            str(_p("hyprtk-iso-creator/venv/lib/python*/site-packages/hyprtk_isocreator/__init__.py")),
+        ],
         "settings": [],
         "process": r"hyprtk-iso-creator",
     },
@@ -100,13 +112,24 @@ APPS = [
 _VERSION_RE = re.compile(r"""^__version__\s*=\s*["']([^"']+)["']""", re.MULTILINE)
 
 
-def version_from(path: Path) -> str:
-    try:
-        text = path.read_text(encoding="utf-8", errors="replace")
-    except OSError:
-        return ""
+def _version_from_text(text: str) -> str:
     match = _VERSION_RE.search(text)
     return match.group(1) if match else ""
+
+
+def version_from(path: Path) -> str:
+    try:
+        return _version_from_text(path.read_text(encoding="utf-8", errors="replace"))
+    except OSError:
+        return ""
+
+
+def _version_from_zip(path: Path, member: str) -> str:
+    try:
+        with zipfile.ZipFile(path) as archive:
+            return _version_from_text(archive.read(member).decode("utf-8", "replace"))
+    except (OSError, KeyError, zipfile.BadZipFile):
+        return ""
 
 
 def version(app: dict) -> str:
@@ -114,6 +137,14 @@ def version(app: dict) -> str:
         found = version_from(candidate)
         if found:
             return found
+    for pattern in app.get("version_globs") or []:
+        for match in sorted(globmod.glob(os.path.expanduser(pattern))):
+            found = version_from(Path(match))
+            if found:
+                return found
+    archive = app.get("version_zip")
+    if archive:
+        return _version_from_zip(Path(archive["path"]).expanduser(), archive["member"])
     return ""
 
 
@@ -156,6 +187,7 @@ def describe(app: dict) -> dict:
         "installed": installed(app),
         "running": running(app),
         "settings": settings_argv(app),
+        "settings_hint": app.get("settings_hint", ""),
     }
 
 

@@ -4,7 +4,7 @@ All notable changes to hyprtk-system-manager are recorded here. The format is
 loosely [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions are
 independent of the suite tag that carries them.
 
-## [0.1.0] — 2026-11-23
+## [0.1.0] — 2026-11-24
 
 First scaffold: the whole application shape plus eight functional panels.
 
@@ -58,6 +58,20 @@ First scaffold: the whole application shape plus eight functional panels.
   desktop entry, v09-style icon, `doctor`, backups CLI, 62 unit tests, QML lint
   pass, off-screen boot check for one page of each kind, installer round-trip,
   and a deterministic off-screen screenshot tool.
+
+### Suite integration (P0)
+
+- Vendored into `hyprtk-merged` (`installer/hyprtk-system-manager/`) and
+  installed by `1-install.sh` after config-manager.
+- `Super+I` keybinding in `hypr/keybindings.lua`.
+- ISO: `--system` install in `customize_airootfs.sh` and a first-run
+  `~/.local/bin/hyprtk-settings` launcher link.
+- Generated v09 `hyprtk-system-manager` icon (gear badge) and
+  `docs/branding/banner.png` + `banner.svg` + `icon.png` with a README header.
+- Suite panel no longer offers settings buttons that do not exist; fm/term/
+  editor show their in-app `Ctrl+,` hint, and USB/ISO versions are read from the
+  zipapp and the venv package.
+- 68 tests: zipapp/venv/glob version lookup and settings-entrypoint guards.
 
 ### Fixed
 

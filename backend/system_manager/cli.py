@@ -97,6 +97,14 @@ def cmd_apply(args) -> int:
     return 0 if result.get("ok") else 1
 
 
+def _action_name(panel_id: str, name: str) -> str:
+    """Accept both ``create`` and ``users.create`` on the CLI."""
+    name = (name or "").strip()
+    if name and "." not in name:
+        return f"{panel_id}.{name}"
+    return name
+
+
 def cmd_action(args) -> int:
     from . import rpc
 
@@ -109,7 +117,8 @@ def cmd_action(args) -> int:
             return 2
     response = rpc.handle({
         "id": 1, "method": "action",
-        "params": {"id": args.id, "action": args.action, "args": payload},
+        "params": {"id": args.id, "action": _action_name(args.id, args.action),
+                   "args": payload},
     })
     if "error" in response:
         print(response["error"], file=sys.stderr)

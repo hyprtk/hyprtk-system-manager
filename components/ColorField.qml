@@ -15,7 +15,7 @@ Row {
 
     Rectangle {
         id: swatch
-        width: 32; height: 32; radius: Theme.radiusSm
+        width: 30; height: 30; radius: Theme.radiusControl
         color: Theme.isHex(root.value) ? root.value : Theme.accent
         border.width: 1
         border.color: Theme.alpha(Theme.foreground, 0.25)
@@ -43,10 +43,10 @@ Row {
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
         background: Rectangle {
-            radius: Theme.radiusSm
-            color: Theme.surface2
+            radius: Theme.radiusCard
+            color: Theme.background
             border.width: 1
-            border.color: Theme.borderStrong
+            border.color: Theme.alpha(Theme.accent2, 0.35)
         }
 
         contentItem: Grid {

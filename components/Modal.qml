@@ -1,5 +1,5 @@
-// Shared modal card: scrim, title, message, arbitrary body, footer actions.
-// Used for destructive confirmation, password entry and the file picker.
+// Shared modal card in the bar's dialog style: 96% background, 14px radius,
+// accent2 border, accent title and 30px buttons.
 import QtQuick
 import "../theme"
 
@@ -34,36 +34,37 @@ Item {
         id: card
         anchors.centerIn: parent
         width: Math.min(460, parent.width - 80)
-        implicitHeight: content.implicitHeight + 40
-        radius: Theme.radiusLg
-        color: Theme.surface1
+        implicitHeight: content.implicitHeight + 36
+        radius: Theme.radiusPanel
+        color: Qt.rgba(Theme.background.r, Theme.background.g, Theme.background.b,
+                       Theme.panelOpacityStrong)
         border.width: 1
-        border.color: Theme.borderStrong
+        border.color: Theme.alpha(Theme.accent2, 0.35)
 
         Column {
             id: content
-            width: parent.width - 40
-            x: 20
-            y: 20
+            width: parent.width - 36
+            x: 18
+            y: 18
             spacing: 10
 
             Text {
                 width: parent.width
                 text: modal.title
                 visible: modal.title.length > 0
-                color: Theme.text
+                color: Theme.accent
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.size(4)
-                font.weight: Font.DemiBold
+                font.bold: true
                 wrapMode: Text.WordWrap
             }
             Text {
                 width: parent.width
                 text: modal.message
                 visible: modal.message.length > 0
-                color: Theme.textMuted
+                color: Theme.dim
                 font.family: Theme.fontFamily
-                font.pixelSize: Theme.size(2)
+                font.pixelSize: Theme.size(1)
                 wrapMode: Text.WordWrap
                 lineHeight: 1.3
             }

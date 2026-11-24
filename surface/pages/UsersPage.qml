@@ -61,10 +61,10 @@ Flickable {
 
         Column {
             id: column
-            x: 28
+            x: 16
             y: 20
-            width: parent.width - 56
-            spacing: 14
+            width: parent.width - 32
+            spacing: 10
 
             SectionCard {
                 width: column.width

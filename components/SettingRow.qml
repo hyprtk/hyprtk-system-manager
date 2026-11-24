@@ -1,4 +1,5 @@
-// One settings row: label and help on the left, a value or control on the right.
+// One settings row in the bar-qt rhythm: a fixed-width label column, then the
+// control immediately to its right (not pushed to the far edge), 8px apart.
 import QtQuick
 import "../theme"
 
@@ -10,23 +11,23 @@ Item {
     property string value: ""
     property bool mono: false
     property bool copyValue: false
-    property bool separator: true
+    property int labelWidth: 180
     default property alias control: controlRow.data
 
     width: parent ? parent.width : 0
-    implicitHeight: Math.max(leftColumn.implicitHeight, host.implicitHeight, 24) + 16
+    implicitHeight: Math.max(leftColumn.implicitHeight, host.implicitHeight, Theme.controlHeight) + 4
 
     Column {
         id: leftColumn
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
-        width: Math.max(60, parent.width - host.width - 18)
+        width: row.labelWidth
         spacing: 2
 
         Text {
             width: parent.width
             text: row.label
-            color: Theme.text
+            color: Theme.foreground
             font.family: Theme.fontFamily
             font.pixelSize: Theme.size(2)
             elide: Text.ElideRight
@@ -35,9 +36,9 @@ Item {
             width: parent.width
             visible: row.help.length > 0
             text: row.help
-            color: Theme.textFaint
+            color: Theme.dim
             font.family: Theme.fontFamily
-            font.pixelSize: Theme.size(1)
+            font.pixelSize: Theme.size(0)
             wrapMode: Text.WordWrap
             lineHeight: 1.2
         }
@@ -45,6 +46,8 @@ Item {
 
     Row {
         id: host
+        anchors.left: leftColumn.right
+        anchors.leftMargin: 8
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
         spacing: 8
@@ -54,23 +57,22 @@ Item {
             visible: row.value.length > 0
             anchors.verticalCenter: parent.verticalCenter
             text: row.value
-            color: Theme.textMuted
+            color: Theme.foreground
             font.family: row.mono ? Theme.monoFamily : Theme.fontFamily
             font.pixelSize: row.mono ? Theme.size(1) : Theme.size(2)
             elide: Text.ElideMiddle
-            width: Math.min(implicitWidth, 320)
-            horizontalAlignment: Text.AlignRight
+            width: Math.min(implicitWidth, row.width - row.labelWidth - 16)
         }
         Row { id: controlRow; spacing: 8; anchors.verticalCenter: parent.verticalCenter }
 
         Rectangle {
             visible: row.copyValue && row.value.length > 0
-            width: 24
-            height: 24
+            width: 22
+            height: 22
             radius: 6
-            color: copyHover.hovered ? Theme.surface3 : "transparent"
+            color: copyHover.hovered ? Theme.hoverTint : "transparent"
             anchors.verticalCenter: parent.verticalCenter
-            Glyph { anchors.centerIn: parent; glyph: "\uf0c5"; pixelSize: Theme.size(1); dim: true }
+            Glyph { anchors.centerIn: parent; glyph: "\uf0c5"; pixelSize: Theme.size(0); color: Theme.dim }
             HoverHandler { id: copyHover }
             TapHandler {
                 onTapped: {
@@ -86,13 +88,5 @@ Item {
         id: clipboard
         visible: false
         width: 1; height: 1
-    }
-
-    Rectangle {
-        visible: row.separator
-        anchors.bottom: parent.bottom
-        width: parent.width
-        height: 1
-        color: Theme.alpha(Theme.foreground, 0.06)
     }
 }

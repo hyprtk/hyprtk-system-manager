@@ -45,7 +45,6 @@ Item {
         id: item
         visible: root.kind !== "action" && root.kind !== "list" &&
                  root.kind !== "note" && root.kind !== "kv"
-        separator: true
         label: root.rowData.label || ""
         help: root.rowData.help || ""
         value: root.kind === "info" ? (root.rowData.value || "") : ""
@@ -151,11 +150,11 @@ Item {
         id: note
         visible: root.kind === "note"
         width: parent.width
-        implicitHeight: noteText.implicitHeight + 20
-        radius: Theme.radiusSm
-        color: Theme.alpha(tint, 0.10)
+        implicitHeight: noteText.implicitHeight + 18
+        radius: Theme.radiusCard
+        color: Theme.cardFill
         border.width: 1
-        border.color: Theme.alpha(tint, 0.35)
+        border.color: Theme.alpha(tint, 0.30)
 
         readonly property color tint:
             root.rowData.tone === "danger" ? Theme.danger :
@@ -165,22 +164,22 @@ Item {
         Row {
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.margins: 10
+            anchors.margins: 9
             anchors.verticalCenter: parent.verticalCenter
             spacing: 8
             Glyph {
                 glyph: root.rowData.tone === "danger" ? "\uf00d"
                      : root.rowData.tone === "warn" ? "\uf05a"
                      : root.rowData.tone === "ok" ? "\uf00c" : "\uf05a"
-                pixelSize: Theme.size(2)
+                pixelSize: Theme.size(1)
                 color: note.tint
                 anchors.verticalCenter: parent.verticalCenter
             }
             Text {
                 id: noteText
-                width: parent.width - 26
+                width: parent.width - 24
                 text: root.rowData.text || ""
-                color: Theme.textMuted
+                color: Theme.dim
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.size(1)
                 wrapMode: Text.WordWrap
@@ -200,20 +199,20 @@ Item {
             model: root.rowData.items || []
             delegate: Rectangle {
                 required property var modelData
-                height: 24
-                width: chipText.implicitWidth + 18
-                radius: 12
-                color: Theme.alpha(Theme.surface2, 0.8)
+                height: 22
+                width: chipText.implicitWidth + 16
+                radius: Theme.radiusControl
+                color: Theme.alpha(Theme.accent2, 0.12)
                 border.width: 1
-                border.color: Theme.border
+                border.color: Theme.alpha(Theme.accent2, 0.22)
                 Text {
                     id: chipText
                     anchors.centerIn: parent
                     text: (modelData.label || "") +
                           (modelData.value ? "  " + modelData.value : "")
-                    color: Theme.textMuted
+                    color: Theme.dim
                     font.family: Theme.monoFamily
-                    font.pixelSize: Theme.size(1)
+                    font.pixelSize: 10
                 }
             }
         }

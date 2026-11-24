@@ -1,3 +1,5 @@
+// Slider matching hyprtk-bar-qt/components/TSlider: a dim track, accent fill
+// and a 16px accent handle with a background-coloured ring.
 import QtQuick
 import "../theme"
 
@@ -8,11 +10,10 @@ Item {
     property real from: 0
     property real to: 100
     property real step: 1
-    property bool mono: false
     signal moved(real value)
 
     implicitWidth: 220
-    implicitHeight: 28
+    implicitHeight: 24
 
     readonly property real ratio:
         (root.to - root.from) !== 0
@@ -25,7 +26,7 @@ Item {
         width: parent.width
         height: 4
         radius: 2
-        color: Theme.surface3
+        color: Theme.alpha(Theme.dim, 0.30)
     }
     Rectangle {
         anchors.verticalCenter: track.verticalCenter
@@ -34,29 +35,20 @@ Item {
         radius: 2
         color: Theme.accent
     }
-    Text {
-        anchors.right: parent.right
-        anchors.bottom: parent.top
-        anchors.bottomMargin: -2
-        text: root.mono ? root.value : Math.round(root.value) + "%"
-        color: Theme.textFaint
-        font.family: root.mono ? Theme.monoFamily : Theme.fontFamily
-        font.pixelSize: Theme.size(0)
-        visible: false
-    }
     Rectangle {
         id: handle
         width: 16
         height: 16
         radius: 8
-        color: Theme.accent
+        color: mouse.pressed ? Theme.accent2 : Theme.accent
         border.width: 2
-        border.color: Theme.background
+        border.color: Theme.alpha(Theme.background, 0.9)
         y: (root.height - height) / 2
         x: Math.max(0, Math.min(root.width - width, root.ratio * (root.width - width)))
     }
 
     MouseArea {
+        id: mouse
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
         function setFromX(px) {
@@ -70,7 +62,7 @@ Item {
             next = Math.max(root.from, Math.min(root.to, next));
             root.moved(next);
         }
-        onPressed: (mouse) => setFromX(mouse.x)
-        onPositionChanged: (mouse) => { if (pressed) setFromX(mouse.x); }
+        onPressed: (event) => setFromX(event.x)
+        onPositionChanged: (event) => { if (pressed) setFromX(event.x); }
     }
 }

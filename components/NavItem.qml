@@ -1,3 +1,5 @@
+// Sidebar item matching the bar's Settings nav: 32px tall, radius 8, selected
+// item is the accent fill with black text, hover is accent2 at 15%.
 import QtQuick
 import "../theme"
 
@@ -6,45 +8,33 @@ Rectangle {
     property string glyph: ""
     property string label: ""
     property bool active: false
-    property int count: -1
     signal clicked()
 
     width: parent ? parent.width : 0
-    height: 34
-    radius: Theme.radiusSm
-    color: item.active ? Theme.alpha(Theme.accent, 0.22)
-         : (hover.hovered ? Theme.alpha(Theme.foreground, 0.06) : "transparent")
-
-    Rectangle {
-        visible: item.active
-        width: 3
-        height: 16
-        radius: 2
-        color: Theme.accent
-        anchors.left: parent.left
-        anchors.leftMargin: 2
-        anchors.verticalCenter: parent.verticalCenter
-    }
+    height: 32
+    radius: Theme.radiusCard
+    color: item.active
+        ? Theme.alpha(Theme.accent, 0.85)
+        : (hover.hovered ? Theme.hoverTint : "transparent")
 
     Row {
         anchors.left: parent.left
-        anchors.leftMargin: 14
+        anchors.leftMargin: 10
         anchors.right: parent.right
-        anchors.rightMargin: 10
+        anchors.rightMargin: 8
         anchors.verticalCenter: parent.verticalCenter
-        spacing: 10
+        spacing: 9
 
         Glyph {
             glyph: item.glyph
             pixelSize: Theme.size(2)
-            color: item.active ? Theme.accent : Theme.textMuted
+            color: item.active ? Theme.textOnAccent : Theme.foreground
             anchors.verticalCenter: parent.verticalCenter
         }
         Text {
-            id: labelText
-            width: parent.width - 42
+            width: parent.width - 26
             text: item.label
-            color: item.active ? Theme.text : Theme.textMuted
+            color: item.active ? Theme.textOnAccent : Theme.foreground
             font.family: Theme.fontFamily
             font.pixelSize: Theme.size(2)
             font.weight: item.active ? Font.DemiBold : Font.Normal

@@ -9,7 +9,7 @@ Singleton {
     readonly property bool testMode: Quickshell.env("HYPRTK_SM_TEST") === "1"
     readonly property int windowWidth: 1180
     readonly property int windowHeight: 800
-    readonly property int sidebarWidth: 248
+    readonly property int sidebarWidth: 200
 
     property string page: Quickshell.env("HYPRTK_SM_PAGE") || "about"
     property var lastPage: "about"

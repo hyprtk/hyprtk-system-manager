@@ -1,4 +1,4 @@
-// A list of rows with badges and inline actions (users, services, suite apps).
+// Rows with badges and inline actions, in the bar's module-card language.
 import QtQuick
 import "../theme"
 
@@ -9,7 +9,7 @@ Column {
     signal invoke(var action)
 
     width: parent ? parent.width : 0
-    spacing: 6
+    spacing: 4
 
     Repeater {
         model: root.items
@@ -19,29 +19,29 @@ Column {
             required property var modelData
 
             width: root.width
-            height: Math.max(52, textColumn.implicitHeight + 20)
-            radius: Theme.radiusSm
-            color: Theme.alpha(Theme.surface2, 0.55)
+            height: Math.max(44, textColumn.implicitHeight + 14)
+            radius: Theme.radiusCard
+            color: Theme.cardFill
             border.width: 1
-            border.color: Theme.border
+            border.color: Theme.cardBorder
 
             Column {
                 id: textColumn
                 anchors.left: parent.left
-                anchors.leftMargin: 12
+                anchors.leftMargin: 10
                 anchors.right: actions.left
-                anchors.rightMargin: 10
+                anchors.rightMargin: 8
                 anchors.verticalCenter: parent.verticalCenter
-                spacing: 2
+                spacing: 1
 
                 Row {
                     spacing: 6
                     Text {
                         text: row.modelData.title || ""
-                        color: Theme.text
+                        color: Theme.foreground
                         font.family: Theme.fontFamily
                         font.pixelSize: Theme.size(2)
-                        font.weight: Font.DemiBold
+                        font.bold: true
                     }
                     Repeater {
                         model: row.modelData.badges || []
@@ -59,9 +59,9 @@ Column {
                     width: parent.width
                     visible: (row.modelData.subtitle || "").length > 0
                     text: row.modelData.subtitle || ""
-                    color: Theme.textFaint
+                    color: Theme.dim
                     font.family: Theme.fontFamily
-                    font.pixelSize: Theme.size(1)
+                    font.pixelSize: Theme.size(0)
                     elide: Text.ElideRight
                 }
             }
@@ -69,9 +69,9 @@ Column {
             Row {
                 id: actions
                 anchors.right: parent.right
-                anchors.rightMargin: 10
+                anchors.rightMargin: 8
                 anchors.verticalCenter: parent.verticalCenter
-                spacing: 6
+                spacing: 5
 
                 Repeater {
                     model: row.modelData.actions || []
@@ -91,7 +91,7 @@ Column {
     Text {
         visible: root.items.length === 0
         text: "Nothing here."
-        color: Theme.textFaint
+        color: Theme.dim
         font.family: Theme.fontFamily
         font.pixelSize: Theme.size(2)
     }

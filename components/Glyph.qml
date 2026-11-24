@@ -10,7 +10,7 @@ Text {
     property bool dim: false
 
     text: root.glyph
-    color: root.dim ? Theme.textMuted : Theme.text
+    color: root.dim ? Theme.dim : Theme.text
     font.family: Theme.iconFont
     font.pixelSize: root.pixelSize
     verticalAlignment: Text.AlignVCenter

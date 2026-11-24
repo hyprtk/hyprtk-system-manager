@@ -59,6 +59,16 @@ First scaffold: the whole application shape plus eight functional panels.
   pass, off-screen boot check for one page of each kind, installer round-trip,
   and a deterministic off-screen screenshot tool.
 
+### Changed
+
+- **Retheme to the bar-qt dialog language.** Every surface now uses the exact
+  tokens from `hyprtk-bar-qt/components`: 30px controls on a 60% background
+  fill with `accent2` borders, accent2-tinted 30px buttons, 16px slider handles,
+  the 46×24 pill toggle, 8px cards with accent section titles, a 200px sidebar
+  with the black-on-accent selection, 0.96 panel opacity and the animated accent
+  border. The previous card-and-uppercase look, the right-aligned value column
+  and the 34px controls are gone.
+
 ### Notes
 
 - The Hyprland configuration stays owned by config-manager; the Hyprland panel

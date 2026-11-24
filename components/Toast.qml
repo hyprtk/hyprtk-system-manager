@@ -1,3 +1,4 @@
+// Transient status line in the bar's tooltip/popup language.
 import QtQuick
 import "../theme"
 
@@ -19,12 +20,13 @@ Rectangle {
         timer.restart();
     }
 
-    width: Math.min(560, text.implicitWidth + 40)
-    height: 40
-    radius: 20
-    color: Theme.surface2
+    width: Math.min(560, text.implicitWidth + 32)
+    height: 34
+    radius: Theme.radiusControl
+    color: Qt.rgba(Theme.background.r, Theme.background.g, Theme.background.b,
+                   Theme.panelOpacityStrong)
     border.width: 1
-    border.color: Theme.alpha(toast.tint, 0.5)
+    border.color: Theme.alpha(toast.tint, 0.45)
     opacity: 0
     visible: opacity > 0.01
     z: 950
@@ -34,14 +36,14 @@ Rectangle {
     Row {
         anchors.centerIn: parent
         spacing: 8
-        Rectangle { width: 8; height: 8; radius: 4; color: toast.tint; anchors.verticalCenter: parent.verticalCenter }
+        Rectangle { width: 7; height: 7; radius: 3.5; color: toast.tint; anchors.verticalCenter: parent.verticalCenter }
         Text {
             id: text
             anchors.verticalCenter: parent.verticalCenter
             text: toast.message
-            color: Theme.text
+            color: Theme.foreground
             font.family: Theme.fontFamily
-            font.pixelSize: Theme.size(2)
+            font.pixelSize: Theme.size(1)
             elide: Text.ElideRight
             width: Math.min(implicitWidth, 500)
         }

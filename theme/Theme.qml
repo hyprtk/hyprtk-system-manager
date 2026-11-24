@@ -108,14 +108,33 @@ Singleton {
     readonly property color text: root.foreground
     readonly property color textMuted: root.alpha(root.foreground, 0.68)
     readonly property color textFaint: root.alpha(root.foreground, 0.45)
-    readonly property color textOnAccent: "#101014"
+    readonly property color dim: root.textFaint
+    readonly property color textOnAccent: "#000000"
     readonly property color textOnDanger: "#ffffff"
-    readonly property color scrim: Qt.rgba(0, 0, 0, 0.45)
+    readonly property color scrim: Qt.rgba(0, 0, 0, 0.35)
+
+    // ── bar-qt dialog tokens ───────────────────────────────────────────
+    // These mirror components/TButton, TTextField, TComboBox and the Settings
+    // panel in hyprtk-bar-qt so every surface here reads as the same suite.
+    readonly property real panelOpacity: Math.max(0.92, root.num(root.barCfg.opacity, 0.92))
+    readonly property real panelOpacityStrong: Math.max(0.96, root.num(root.barCfg.opacity, 0.92))
+    readonly property int controlHeight: 30
+    readonly property int radiusControl: 6
+    readonly property int radiusCard: 8
+    readonly property color controlFill: root.alpha(root.background, 0.60)
+    readonly property color controlBorder: root.alpha(root.accent2, 0.30)
+    readonly property color hoverTint: root.alpha(root.accent2, 0.15)
+    readonly property color pressTint: root.alpha(root.accent, 0.40)
+    readonly property color buttonFill: root.alpha(root.accent2, 0.14)
+    readonly property color buttonHover: root.alpha(root.accent2, 0.28)
+    readonly property color buttonBorder: root.alpha(root.accent2, 0.35)
+    readonly property color cardFill: root.alpha(root.background, 0.42)
+    readonly property color cardBorder: root.alpha(root.accent2, 0.15)
 
     // ── metrics ────────────────────────────────────────────────────────
     readonly property int radiusSm: 8
     readonly property int radiusMd: 12
-    readonly property int radiusLg: 16
+    readonly property int radiusLg: 14
     readonly property int borderWidth: {
         const value = root.barCfg.border_width;
         return (typeof value === "number" && value > 0) ? Math.min(4, value) : 2;

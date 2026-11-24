@@ -457,7 +457,8 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: Theme.radiusLg
-        color: Theme.background
+        color: Qt.rgba(Theme.background.r, Theme.background.g, Theme.background.b,
+                       Theme.panelOpacityStrong)
         clip: true
 
         Row {
@@ -484,7 +485,7 @@ Item {
                 }
             }
 
-            Rectangle { width: 1; height: parent.height; color: Theme.border }
+            Rectangle { width: 1; height: parent.height; color: Theme.alpha(Theme.foreground, 0.10) }
 
             Item {
                 width: parent.width - Config.sidebarWidth - 1
@@ -494,51 +495,45 @@ Item {
                 Item {
                     id: header
                     width: parent.width
-                    height: 82
+                    height: 60
 
                     Row {
-                        x: 24
+                        x: 16
                         anchors.verticalCenter: parent.verticalCenter
-                        spacing: 12
+                        spacing: 10
 
-                        Rectangle {
-                            width: 40; height: 40; radius: 11
-                            color: Theme.alpha(Theme.accent, 0.13)
-                            border.width: 1
-                            border.color: Theme.alpha(Theme.accent, 0.3)
-                            Glyph {
-                                anchors.centerIn: parent
-                                glyph: app.currentMeta.icon || "\uf05a"
-                                pixelSize: Theme.size(4)
-                                color: Theme.accent
-                            }
+                        Glyph {
+                            glyph: app.currentMeta.icon || "\uf05a"
+                            pixelSize: 18
+                            color: Theme.accent
+                            anchors.verticalCenter: parent.verticalCenter
                         }
                         Column {
                             anchors.verticalCenter: parent.verticalCenter
-                            spacing: 2
+                            spacing: 1
                             Text {
                                 text: app.currentMeta.title || "Settings"
-                                color: Theme.text
+                                color: Theme.foreground
                                 font.family: Theme.fontFamily
-                                font.pixelSize: Theme.size(5)
-                                font.weight: Font.DemiBold
+                                font.pixelSize: Theme.size(3)
+                                font.bold: true
                             }
                             Text {
                                 text: app.currentMeta.description || ""
-                                color: Theme.textMuted
+                                color: Theme.dim
                                 font.family: Theme.fontFamily
-                                font.pixelSize: Theme.size(1)
+                                font.pixelSize: Theme.size(0)
                                 elide: Text.ElideRight
-                                width: Math.min(implicitWidth, 520)
+                                width: Math.min(implicitWidth, 560)
                             }
                         }
                     }
 
                     Row {
                         anchors.right: parent.right
-                        anchors.rightMargin: 24
+                        anchors.rightMargin: 16
                         anchors.verticalCenter: parent.verticalCenter
-                        spacing: 10
+                        spacing: 8
 
                         StatusPill {
                             anchors.verticalCenter: parent.verticalCenter
@@ -558,7 +553,7 @@ Item {
                         anchors.bottom: parent.bottom
                         width: parent.width
                         height: 1
-                        color: Theme.border
+                        color: Theme.alpha(Theme.foreground, 0.10)
                     }
                 }
 
@@ -610,16 +605,17 @@ Item {
                         Rectangle {
                             anchors.centerIn: parent
                             width: 220
-                            height: 60
-                            radius: Theme.radiusMd
-                            color: Theme.alpha(Theme.surface1, 0.9)
+                            height: 58
+                            radius: Theme.radiusCard
+                            color: Qt.rgba(Theme.background.r, Theme.background.g,
+                                           Theme.background.b, Theme.panelOpacityStrong)
                             border.width: 1
-                            border.color: Theme.border
+                            border.color: Theme.alpha(Theme.accent2, 0.25)
                             Row {
                                 anchors.centerIn: parent
                                 spacing: 10
                                 Rectangle {
-                                    width: 10; height: 10; radius: 5
+                                    width: 8; height: 8; radius: 4
                                     color: Theme.accent
                                     SequentialAnimation on opacity {
                                         loops: Animation.Infinite
@@ -630,9 +626,9 @@ Item {
                                 Text {
                                     anchors.verticalCenter: parent.verticalCenter
                                     text: "Reading settings…"
-                                    color: Theme.textMuted
+                                    color: Theme.dim
                                     font.family: Theme.fontFamily
-                                    font.pixelSize: Theme.size(2)
+                                    font.pixelSize: Theme.size(1)
                                 }
                             }
                         }
@@ -645,24 +641,24 @@ Item {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom
-                    height: 58
-                    color: Theme.alpha(Theme.surface0, 0.72)
+                    height: 48
+                    color: "transparent"
 
                     Rectangle {
                         anchors.top: parent.top
                         width: parent.width
                         height: 1
-                        color: Theme.border
+                        color: Theme.alpha(Theme.foreground, 0.10)
                     }
 
                     Row {
                         anchors.left: parent.left
-                        anchors.leftMargin: 24
+                        anchors.leftMargin: 16
                         anchors.verticalCenter: parent.verticalCenter
-                        spacing: 10
+                        spacing: 8
 
                         Rectangle {
-                            width: 8; height: 8; radius: 4
+                            width: 7; height: 7; radius: 3.5
                             anchors.verticalCenter: parent.verticalCenter
                             color: app.applyRunning ? Theme.warn
                                  : app.dirty ? Theme.accent
@@ -670,24 +666,24 @@ Item {
                         }
                         Text {
                             anchors.verticalCenter: parent.verticalCenter
-                            width: Math.min(implicitWidth, pageHost.width - 380)
+                            width: Math.min(implicitWidth, pageHost.width - 340)
                             text: app.dirty
                                 ? app.pendingCount + " pending change" +
                                   (app.pendingCount === 1 ? "" : "s") +
                                   (app.applyRunning ? " · applying…" : " · press Apply to write")
                                 : app.status
-                            color: app.dirty ? Theme.accent2 : Theme.textMuted
+                            color: app.dirty ? Theme.accent2 : Theme.dim
                             font.family: Theme.fontFamily
-                            font.pixelSize: Theme.size(1)
+                            font.pixelSize: Theme.size(0)
                             elide: Text.ElideRight
                         }
                     }
 
                     Row {
                         anchors.right: parent.right
-                        anchors.rightMargin: 24
+                        anchors.rightMargin: 16
                         anchors.verticalCenter: parent.verticalCenter
-                        spacing: 8
+                        spacing: 6
                         TButton {
                             text: "Revert"
                             visible: app.dirty
@@ -746,7 +742,7 @@ Item {
             visible: (app.confirmState.required || "").length > 0
             width: parent.width
             text: "Type “" + (app.confirmState.required || "") + "” to continue."
-            color: Theme.textMuted
+            color: Theme.dim
             font.family: Theme.fontFamily
             font.pixelSize: Theme.size(1)
             wrapMode: Text.WordWrap
@@ -848,10 +844,10 @@ Item {
         Rectangle {
             width: parent.width
             height: 300
-            radius: Theme.radiusSm
-            color: Theme.alpha(Theme.surface2, 0.5)
+            radius: Theme.radiusCard
+            color: Theme.cardFill
             border.width: 1
-            border.color: Theme.border
+            border.color: Theme.cardBorder
 
             ListView {
                 anchors.fill: parent
@@ -865,7 +861,7 @@ Item {
                     height: 30
                     radius: 6
                     color: modelData.path === app.pickerSelected ? Theme.alpha(Theme.accent, 0.25)
-                         : (entryHover.hovered ? Theme.alpha(Theme.foreground, 0.06) : "transparent")
+                         : (entryHover.hovered ? Theme.hoverTint : "transparent")
 
                     Row {
                         anchors.left: parent.left
@@ -884,7 +880,7 @@ Item {
                             width: parent.width - 30
                             anchors.verticalCenter: parent.verticalCenter
                             text: modelData.name
-                            color: modelData.dir ? Theme.text : Theme.textMuted
+                            color: modelData.dir ? Theme.foreground : Theme.dim
                             font.family: Theme.fontFamily
                             font.pixelSize: Theme.size(2)
                             elide: Text.ElideRight

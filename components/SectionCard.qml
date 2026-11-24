@@ -1,5 +1,5 @@
-// A titled group of rows. The suite's settings language: surface card, a small
-// uppercase title, optional explanation, then full-width rows.
+// Section card in the bar-qt module-card language: radius 8, background at 42%,
+// accent2 border at 15%, accent section title, dim description.
 import QtQuick
 import "../theme"
 
@@ -11,18 +11,18 @@ Rectangle {
     default property alias body: rows.data
 
     width: parent ? parent.width : 0
-    implicitHeight: column.implicitHeight + 32
-    radius: Theme.radiusMd
-    color: Theme.alpha(Theme.surface1, 0.66)
+    implicitHeight: column.implicitHeight + 16
+    radius: Theme.radiusCard
+    color: Theme.cardFill
     border.width: 1
-    border.color: Theme.border
+    border.color: Theme.cardBorder
 
     Column {
         id: column
-        width: parent.width - 32
-        x: 16
-        y: 16
-        spacing: 8
+        width: parent.width - 16
+        x: 8
+        y: 8
+        spacing: 6
 
         Text {
             visible: card.title.length > 0
@@ -30,25 +30,23 @@ Rectangle {
             text: card.title
             color: Theme.accent
             font.family: Theme.fontFamily
-            font.pixelSize: Theme.size(1)
-            font.weight: Font.DemiBold
-            font.letterSpacing: 0.8
-            font.capitalization: Font.AllUppercase
+            font.pixelSize: Theme.size(2)
+            font.bold: true
         }
         Text {
             visible: card.description.length > 0
             width: parent.width
             text: card.description
-            color: Theme.textMuted
+            color: Theme.dim
             font.family: Theme.fontFamily
-            font.pixelSize: Theme.size(1)
+            font.pixelSize: Theme.size(0)
             wrapMode: Text.WordWrap
             lineHeight: 1.25
         }
         Column {
             id: rows
             width: parent.width
-            spacing: 0
+            spacing: 2
         }
     }
 }

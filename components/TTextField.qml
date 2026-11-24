@@ -1,5 +1,5 @@
-// Styled single-line text input. `edited` fires per keystroke; `committed`
-// fires on Enter and on focus loss, which is what a settings form should save.
+// Text field matching hyprtk-bar-qt/components/TTextField: 30px tall, radius 6,
+// translucent background fill and an accent2 border that turns accent on focus.
 import QtQuick
 import "../theme"
 
@@ -18,21 +18,21 @@ Rectangle {
     signal accepted()
 
     implicitWidth: preferredWidth
-    implicitHeight: 32
-    radius: Theme.radiusSm
-    color: Theme.surface2
+    implicitHeight: Theme.controlHeight
+    radius: Theme.radiusControl
+    color: Theme.controlFill
     border.width: 1
     border.color: input.activeFocus ? Theme.accent
                 : field.invalid ? Theme.danger
-                : Theme.border
+                : Theme.controlBorder
 
     TextInput {
         id: input
         anchors.fill: parent
-        anchors.leftMargin: 10
-        anchors.rightMargin: 10
+        anchors.leftMargin: 9
+        anchors.rightMargin: 9
         verticalAlignment: TextInput.AlignVCenter
-        color: Theme.text
+        color: Theme.foreground
         selectionColor: Theme.accent
         selectedTextColor: Theme.textOnAccent
         font.family: field.mono ? Theme.monoFamily : Theme.fontFamily
@@ -45,11 +45,11 @@ Rectangle {
 
     Text {
         anchors.left: parent.left
-        anchors.leftMargin: 10
+        anchors.leftMargin: 9
         anchors.verticalCenter: parent.verticalCenter
         visible: input.text.length === 0
         text: field.placeholder
-        color: Theme.textFaint
+        color: Theme.dim
         font.family: Theme.fontFamily
         font.pixelSize: Theme.size(2)
     }

@@ -1,4 +1,5 @@
-// Navigation: grouped panel list, global search and the app's identity.
+// Navigation in the bar's Settings language: 200px rail at 60% background,
+// accent2 group labels, 32px items with an accent-fill selection.
 import QtQuick
 import "../theme"
 import "../components"
@@ -26,10 +27,6 @@ Rectangle {
             sidebar.searchChanged("");
         }
     }
-
-    color: Theme.alpha(Theme.surface0, 0.9)
-    border.width: 0
-
     function panelsIn(groupId) {
         return sidebar.panels.filter(p => p.group === groupId);
     }
@@ -41,73 +38,70 @@ Rectangle {
         return hay.indexOf(search.text.toLowerCase()) >= 0;
     }
 
+    color: Theme.alpha(Theme.background, 0.60)
+
     Column {
         anchors.fill: parent
-        anchors.topMargin: 18
-        spacing: 10
+        anchors.topMargin: 14
+        spacing: 8
 
         // ── identity ───────────────────────────────────────────────
         Row {
-            x: 18
-            spacing: 10
-            Rectangle {
-                width: 34; height: 34; radius: 9
-                color: Theme.alpha(Theme.accent, 0.18)
-                border.width: 1
-                border.color: Theme.alpha(Theme.accent, 0.4)
-                Glyph {
-                    anchors.centerIn: parent
-                    glyph: "\uf1de"
-                    pixelSize: Theme.size(4)
-                    color: Theme.accent
-                }
+            x: 14
+            width: parent.width - 28
+            spacing: 8
+            Glyph {
+                glyph: "\uf1de"
+                pixelSize: 22
+                color: Theme.accent
+                anchors.verticalCenter: parent.verticalCenter
             }
             Column {
                 anchors.verticalCenter: parent.verticalCenter
-                spacing: 1
+                spacing: 0
                 Text {
                     text: "System Settings"
-                    color: Theme.text
+                    color: Theme.foreground
                     font.family: Theme.fontFamily
                     font.pixelSize: Theme.size(3)
-                    font.weight: Font.DemiBold
+                    font.bold: true
                 }
                 Text {
                     text: sidebar.hostname || "this device"
-                    color: Theme.textFaint
+                    color: Theme.dim
                     font.family: Theme.fontFamily
-                    font.pixelSize: Theme.size(1)
+                    font.pixelSize: Theme.size(0)
                 }
             }
         }
 
         // ── search ─────────────────────────────────────────────────
         Rectangle {
-            x: 14
-            width: parent.width - 28
-            height: 34
-            radius: Theme.radiusSm
-            color: Theme.surface2
+            x: 10
+            width: parent.width - 20
+            height: Theme.controlHeight
+            radius: Theme.radiusControl
+            color: Theme.controlFill
             border.width: 1
-            border.color: search.activeFocus ? Theme.accent : Theme.border
+            border.color: search.activeFocus ? Theme.accent : Theme.controlBorder
 
             Glyph {
                 id: searchGlyph
                 anchors.left: parent.left
-                anchors.leftMargin: 10
+                anchors.leftMargin: 9
                 anchors.verticalCenter: parent.verticalCenter
                 glyph: "\uf002"
-                pixelSize: Theme.size(1)
-                dim: true
+                pixelSize: 10
+                color: Theme.dim
             }
             TextInput {
                 id: search
                 anchors.left: searchGlyph.right
-                anchors.leftMargin: 8
+                anchors.leftMargin: 7
                 anchors.right: parent.right
-                anchors.rightMargin: 10
+                anchors.rightMargin: 9
                 anchors.verticalCenter: parent.verticalCenter
-                color: Theme.text
+                color: Theme.foreground
                 selectionColor: Theme.accent
                 selectedTextColor: Theme.textOnAccent
                 font.family: Theme.fontFamily
@@ -120,7 +114,7 @@ Rectangle {
                     anchors.verticalCenter: parent.verticalCenter
                     visible: search.text.length === 0
                     text: "Search settings…"
-                    color: Theme.textFaint
+                    color: Theme.dim
                     font.family: Theme.fontFamily
                     font.pixelSize: Theme.size(2)
                 }
@@ -131,15 +125,15 @@ Rectangle {
         Flickable {
             id: scroller
             width: parent.width
-            height: parent.height - y - 46
-            contentHeight: navColumn.implicitHeight + 16
+            height: parent.height - y - 32
+            contentHeight: navColumn.implicitHeight + 12
             clip: true
             boundsBehavior: Flickable.StopAtBounds
 
             Column {
                 id: navColumn
                 width: scroller.width
-                spacing: 2
+                spacing: 1
 
                 // search results
                 Repeater {
@@ -148,25 +142,25 @@ Rectangle {
                         required property var modelData
                         width: navColumn.width - 20
                         x: 10
-                        height: 46
-                        radius: Theme.radiusSm
-                        color: resultHover.hovered ? Theme.alpha(Theme.foreground, 0.06) : "transparent"
+                        height: 44
+                        radius: Theme.radiusCard
+                        color: resultHover.hovered ? Theme.hoverTint : "transparent"
 
                         Row {
                             anchors.left: parent.left
-                            anchors.leftMargin: 10
+                            anchors.leftMargin: 8
                             anchors.right: parent.right
                             anchors.rightMargin: 8
                             anchors.verticalCenter: parent.verticalCenter
                             spacing: 8
-                            Glyph { glyph: modelData.icon || ""; pixelSize: Theme.size(2); dim: true; anchors.verticalCenter: parent.verticalCenter }
+                            Glyph { glyph: modelData.icon || ""; pixelSize: Theme.size(2); color: Theme.dim; anchors.verticalCenter: parent.verticalCenter }
                             Column {
-                                width: parent.width - 34
+                                width: parent.width - 30
                                 anchors.verticalCenter: parent.verticalCenter
-                                spacing: 1
+                                spacing: 0
                                 Text {
                                     text: modelData.title || ""
-                                    color: Theme.text
+                                    color: Theme.foreground
                                     font.family: Theme.fontFamily
                                     font.pixelSize: Theme.size(2)
                                     elide: Text.ElideRight
@@ -174,9 +168,9 @@ Rectangle {
                                 }
                                 Text {
                                     text: modelData.description || ""
-                                    color: Theme.textFaint
+                                    color: Theme.dim
                                     font.family: Theme.fontFamily
-                                    font.pixelSize: Theme.size(1)
+                                    font.pixelSize: Theme.size(0)
                                     elide: Text.ElideRight
                                     width: parent.width
                                 }
@@ -197,15 +191,14 @@ Rectangle {
                         visible: sidebar.panelsIn(modelData.id).some(p => sidebar.matches(p))
 
                         Text {
-                            x: 20
-                            topPadding: 12
-                            bottomPadding: 4
-                            text: modelData.title.toUpperCase()
-                            color: Theme.textFaint
+                            x: 14
+                            topPadding: 10
+                            bottomPadding: 2
+                            text: modelData.title
+                            color: Theme.accent2
                             font.family: Theme.fontFamily
                             font.pixelSize: Theme.size(0)
-                            font.letterSpacing: 1.0
-                            font.weight: Font.DemiBold
+                            font.bold: true
                         }
 
                         Repeater {
@@ -225,10 +218,10 @@ Rectangle {
 
                 Text {
                     visible: sidebar.searchText.length > 0 && sidebar.searchResults.length === 0
-                    x: 20
-                    topPadding: 14
+                    x: 14
+                    topPadding: 12
                     text: "No matching settings."
-                    color: Theme.textFaint
+                    color: Theme.dim
                     font.family: Theme.fontFamily
                     font.pixelSize: Theme.size(2)
                 }
@@ -237,27 +230,27 @@ Rectangle {
 
         // ── footer ─────────────────────────────────────────────────
         Row {
-            x: 18
-            width: parent.width - 36
-            spacing: 6
+            x: 14
+            width: parent.width - 28
+            spacing: 5
             Text {
                 text: "v" + (sidebar.version || "0.1.0")
-                color: Theme.textFaint
+                color: Theme.dim
                 font.family: Theme.monoFamily
-                font.pixelSize: Theme.size(0)
+                font.pixelSize: 9
                 anchors.verticalCenter: parent.verticalCenter
             }
             Text {
                 text: "·"
-                color: Theme.textFaint
-                font.pixelSize: Theme.size(0)
+                color: Theme.dim
+                font.pixelSize: 9
                 anchors.verticalCenter: parent.verticalCenter
             }
             Text {
                 text: sidebar.privilege || "user"
-                color: Theme.textFaint
+                color: Theme.dim
                 font.family: Theme.monoFamily
-                font.pixelSize: Theme.size(0)
+                font.pixelSize: 9
                 anchors.verticalCenter: parent.verticalCenter
             }
         }

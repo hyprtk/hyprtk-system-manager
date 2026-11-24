@@ -40,7 +40,7 @@ Flickable {
                 name: mon.name,
                 description: mon.description,
                 mode: mon.currentMode || "preferred",
-                modes: mon.modes || [],
+                modes: JSON.stringify(mon.modes || []),
                 scale: String(mon.scale || 1),
                 transform: String(mon.transform || 0),
                 x: mon.x,
@@ -113,10 +113,10 @@ Flickable {
 
         Column {
             id: column
-            x: 28
+            x: 16
             y: 20
-            width: parent.width - 56
-            spacing: 14
+            width: parent.width - 32
+            spacing: 10
 
             Repeater {
                 model: layout
@@ -143,7 +143,7 @@ Flickable {
                         Dropdown {
                             preferredWidth: 260
                             value: model.mode
-                            choices: page.modeChoices(model.modes)
+                            choices: page.modeChoices(JSON.parse(model.modes || "[]"))
                             onSelected: (v) => layout.setProperty(index, "mode", v)
                         }
                     }
@@ -226,7 +226,7 @@ Flickable {
                     text: page.managed
                         ? "A managed block is present in " + page.configFile
                         : "No managed block yet — “Make persistent” adds one to " + page.configFile
-                    color: Theme.textFaint
+                    color: Theme.dim
                     font.family: Theme.fontFamily
                     font.pixelSize: Theme.size(1)
                     wrapMode: Text.WordWrap

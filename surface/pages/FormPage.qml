@@ -31,10 +31,10 @@ Flickable {
 
         Column {
             id: column
-            x: 28
+            x: 16
             y: 20
-            width: parent.width - 56
-            spacing: 14
+            width: parent.width - 32
+            spacing: 10
 
             Hero {
                 visible: page.hasHero
@@ -75,7 +75,7 @@ Flickable {
                 visible: page.sections.length === 0
                 width: parent.width
                 text: "This panel returned no settings."
-                color: Theme.textFaint
+                color: Theme.dim
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.size(2)
             }

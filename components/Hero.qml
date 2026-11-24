@@ -1,4 +1,5 @@
-// Page hero: a large glyph, an eyebrow, title, subtitle and chips.
+// Compact page hero in the bar's dialog language: an accent glyph, a dim
+// eyebrow, a bold foreground title, dim subtitle and chip pills. No big tile.
 import QtQuick
 import "../theme"
 
@@ -11,55 +12,49 @@ Item {
     property var chips: []
 
     width: parent ? parent.width : 0
-    implicitHeight: layout.implicitHeight + 8
+    implicitHeight: layout.implicitHeight + 6
 
     Row {
         id: layout
         width: parent.width
-        spacing: 18
+        spacing: 12
 
-        Rectangle {
-            width: 64; height: 64; radius: Theme.radiusMd
-            color: Theme.alpha(Theme.accent, 0.14)
-            border.width: 1
-            border.color: Theme.alpha(Theme.accent, 0.35)
-            Glyph {
-                anchors.centerIn: parent
-                glyph: hero.glyph
-                pixelSize: Theme.size(6)
-                color: Theme.accent
-            }
+        Glyph {
+            glyph: hero.glyph
+            pixelSize: 22
+            color: Theme.accent
+            anchors.top: parent.top
+            anchors.topMargin: 2
         }
 
         Column {
-            width: parent.width - 86
-            spacing: 3
+            width: parent.width - 34
+            spacing: 2
 
             Text {
                 visible: hero.eyebrow.length > 0
-                text: hero.eyebrow.toUpperCase()
-                color: Theme.textFaint
+                text: hero.eyebrow
+                color: Theme.dim
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.size(0)
-                font.letterSpacing: 1.1
                 font.weight: Font.DemiBold
             }
             Text {
                 width: parent.width
                 text: hero.title
-                color: Theme.text
+                color: Theme.foreground
                 font.family: Theme.fontFamily
-                font.pixelSize: Theme.size(6)
-                font.weight: Font.DemiBold
+                font.pixelSize: Theme.size(4)
+                font.bold: true
                 elide: Text.ElideRight
             }
             Text {
                 width: parent.width
                 visible: hero.subtitle.length > 0
                 text: hero.subtitle
-                color: Theme.textMuted
+                color: Theme.dim
                 font.family: Theme.fontFamily
-                font.pixelSize: Theme.size(2)
+                font.pixelSize: Theme.size(1)
                 elide: Text.ElideRight
             }
             Row {
@@ -70,7 +65,7 @@ Item {
                     delegate: StatusPill {
                         required property var modelData
                         text: typeof modelData === "string" ? modelData : (modelData.label || "")
-                        tone: "neutral"
+                        tone: "accent2"
                     }
                 }
             }

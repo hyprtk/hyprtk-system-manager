@@ -15,6 +15,7 @@ MONITOR_FIXTURE = [{
     "y": 0,
     "scale": 1,
     "transform": 0,
+    "vrr": 1,
     "disabled": False,
     "availableModes": ["3840x1080@59.97Hz", "1920x1080@60.00Hz", "1920x1080@60.00Hz"],
 }]
@@ -28,6 +29,7 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(mon["name"], "DP-1")
         self.assertEqual(mon["currentMode"], "3840x1080@59.97")
         self.assertEqual(mon["modes"][0]["label"], "3840×1080 @ 59.97 Hz")
+        self.assertEqual(mon["vrr"], 1)
         self.assertEqual(len(mon["modes"]), 2)  # duplicate mode removed
         self.assertEqual(displays.parse_monitors("nope"), [])
 

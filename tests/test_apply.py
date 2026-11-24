@@ -6,7 +6,8 @@ from unittest import mock
 
 from system_manager import jsonconf, paths, priv, util
 from system_manager.panels import (
-    appearance, datetime, displays, fonts, network, notifications, sound,
+    appearance, datetime, displays, fonts,
+    input as input_panel, network, notifications, sound,
     suite, users,
 )
 from system_manager.util import RunResult
@@ -101,12 +102,12 @@ class ApplyTests(unittest.TestCase):
         with mock.patch.object(util, "run", return_value=RunResult(0, "", "")) as runner:
             result = displays.action("displays.apply", {
                 "name": "DP-1", "mode": "1920x1080@60.00", "scale": 1,
-                "transform": 0, "x": 0, "y": 0,
+                "transform": 0, "vrr": 1, "x": 0, "y": 0,
             })
         self.assertTrue(result["ok"])
         argv = runner.call_args[0][0]
         self.assertEqual(argv[:3], ["hyprctl", "keyword", "monitor"])
-        self.assertEqual(argv[3], "DP-1,1920x1080@60.00,0x0,1,0")
+        self.assertEqual(argv[3], "DP-1,1920x1080@60.00,0x0,1,0,1")
 
     def test_sound_apply_input_and_streams(self):
         calls = []
@@ -223,6 +224,74 @@ class ApplyTests(unittest.TestCase):
         self.assertTrue(result["ok"])
         self.assertEqual(calls[0], ["nmcli", "connection", "delete", "id", "Cafe"])
 
+    def test_input_persist_and_clear(self):
+        target = self.tmp / "input.lua"
+        target.write_text("-- base\nhl.config({ input = {} })\n")
+
+        def fake(argv, **kwargs):
+            if argv[:2] == ["hyprctl", "getoption"]:
+                values = {
+                    "input:kb_layout": "str: gb",
+                    "input:kb_variant": "str: ",
+                    "input:repeat_rate": "int: 25",
+                    "input:repeat_delay": "int: 600",
+                    "input:sensitivity": "float: 0.5",
+                    "input:accel_profile": "str: flat",
+                    "input:touchpad:natural_scroll": "bool: true",
+                    "input:touchpad:tap-to-click": "bool: true",
+                    "input:touchpad:disable_while_typing": "bool: false",
+                }
+                return RunResult(0, values.get(argv[2], ""), "")
+            return RunResult(0, "", "")
+
+        with mock.patch.object(paths, "input_file", return_value=target), \
+             mock.patch.object(util, "run", side_effect=fake):
+            result = input_panel.action("input.persist", {})
+            self.assertTrue(result["ok"])
+            text = target.read_text()
+            self.assertIn(input_panel.START, text)
+            self.assertIn('kb_layout = "gb"', text)
+            self.assertIn("repeat_rate = 25", text)
+            self.assertIn('accel_profile = "flat"', text)
+            self.assertIn('natural_scroll = true', text)
+            self.assertIn('["tap-to-click"] = true', text)
+            self.assertIn('disable_while_typing = false', text)
+            self.assertIn("-- base", text)
+
+            cleared = input_panel.action("input.clear_persistent", {})
+            self.assertTrue(cleared["ok"])
+            self.assertNotIn(input_panel.START, target.read_text())
+            self.assertIn("-- base", target.read_text())
+
+    def test_input_persist_restores_on_reload_failure(self):
+        target = self.tmp / "input.lua"
+        original = "-- base\nhl.config({ input = {} })\n"
+        target.write_text(original)
+
+        def fake(argv, **kwargs):
+            if argv[:2] == ["hyprctl", "getoption"]:
+                values = {
+                    "input:kb_layout": "str: gb",
+                    "input:kb_variant": "str: ",
+                    "input:repeat_rate": "int: 25",
+                    "input:repeat_delay": "int: 600",
+                    "input:sensitivity": "float: 0",
+                    "input:accel_profile": "str: ",
+                    "input:touchpad:natural_scroll": "bool: false",
+                    "input:touchpad:tap-to-click": "bool: false",
+                    "input:touchpad:disable_while_typing": "bool: true",
+                }
+                return RunResult(0, values.get(argv[2], ""), "")
+            if argv[:2] == ["hyprctl", "reload"]:
+                return RunResult(1, "", "bad config")
+            return RunResult(0, "", "")
+
+        with mock.patch.object(paths, "input_file", return_value=target), \
+             mock.patch.object(util, "run", side_effect=fake):
+            result = input_panel.action("input.persist", {})
+        self.assertFalse(result["ok"])
+        self.assertEqual(target.read_text(), original)
+
     def test_displays_persist_writes_managed_block(self):
         target = self.tmp / "monitors.lua"
         target.write_text('-- header\nhl.monitor({ output = "", mode = "preferred" })\n')
@@ -230,13 +299,14 @@ class ApplyTests(unittest.TestCase):
              mock.patch.object(util, "run", return_value=RunResult(0, "", "")):
             result = displays.action("displays.persist", {"monitors": [
                 {"name": "DP-1", "mode": "1920x1080@60.00", "scale": 1,
-                 "transform": 0, "x": 0, "y": 0},
+                 "transform": 0, "vrr": 1, "x": 0, "y": 0},
             ]})
         self.assertTrue(result["ok"])
         text = target.read_text()
         self.assertIn(displays.START, text)
         self.assertIn(displays.END, text)
         self.assertIn('output = "DP-1"', text)
+        self.assertIn("vrr = 1", text)
         self.assertIn("hl.monitor({ output = \"\", mode = \"preferred\" })", text)
 
         with mock.patch.object(paths, "monitors_file", return_value=target), \

@@ -139,7 +139,7 @@ hyprtk-settings backups restore 20261123-163000-123
 ## Development
 
 ```sh
-make test    # 83 unit tests
+make test    # 85 unit tests
 make doctor  # probe every panel on this machine
 make qa      # tests + compile + qmllint + off-screen boot + installer round-trip
 ```

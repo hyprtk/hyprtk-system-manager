@@ -91,7 +91,7 @@ PANELS: list[dict[str, Any]] = [
     },
     {
         "id": "input", "title": "Input Devices", "group": "hardware", "icon": "\uf11c",
-        "status": "live", "module": "input",
+        "status": "partial", "module": "input",
         "keywords": ["keyboard", "mouse", "touchpad", "input", "layout", "repeat",
                      "sensitivity", "acceleration", "natural scroll", "tap to click",
                      "keyboard backlight", "numlock"],

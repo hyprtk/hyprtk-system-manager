@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from system_manager import form, paths, rpc
+from system_manager import form, paths, rpc, util
 
 
 class RpcTests(unittest.TestCase):
@@ -66,17 +66,21 @@ class RpcTests(unittest.TestCase):
             rpc.HANDLERS.pop("boom", None)
         self.assertIn("RuntimeError: kaboom", response["error"])
 
-    def test_ui_set_tracks_recent_pages(self):
+    def test_ui_set_stores_last_page_only(self):
+        # The sidebar no longer has a Recent section, so ui state must not keep a
+        # recent list around (a stale one was previously served on `hello`).
         with tempfile.TemporaryDirectory() as tmp:
             saved = paths.UI_STATE
             paths.UI_STATE = Path(tmp) / "ui.json"
             try:
+                util.write_json(paths.UI_STATE, {"last_page": "about",
+                                                 "recent": ["fonts", "users"]})
                 rpc.handle({"id": 10, "method": "ui.set", "params": {"values": {"last_page": "fonts"}}})
                 rpc.handle({"id": 11, "method": "ui.set", "params": {"values": {"last_page": "users"}}})
-                rpc.handle({"id": 12, "method": "ui.set", "params": {"values": {"last_page": "fonts"}}})
-                response = rpc.handle({"id": 13, "method": "ui.get"})
-                self.assertEqual(response["result"]["recent"], ["fonts", "users"])
-                self.assertEqual(response["result"]["last_page"], "fonts")
+                response = rpc.handle({"id": 12, "method": "ui.get"})
+                self.assertEqual(response["result"]["last_page"], "users")
+                self.assertNotIn("recent", response["result"])
+                self.assertNotIn("recent", util.read_json(paths.UI_STATE, {}))
             finally:
                 paths.UI_STATE = saved
 

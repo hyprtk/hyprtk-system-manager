@@ -99,13 +99,9 @@ Flickable {
         };
     }
     function applyMonitor(index) {
-        const entry = layoutEntry(index);
-        if (!entry)
-            return;
-        page.invoke("displays", {
-            action: "displays.apply",
-            args: entry,
-        });
+        // A live change is only possible through the config on this Hyprland
+        // (keyword requests are unsupported), so applying writes the block.
+        page.persistAll();
     }
     function persistAll() {
         const monitors = [];
@@ -120,8 +116,7 @@ Flickable {
         });
     }
     function applyAll() {
-        for (let i = 0; i < layout.count; i++)
-            applyMonitor(i);
+        page.persistAll();
     }
 
     readonly property real canvasScale: {
@@ -250,6 +245,7 @@ Flickable {
                     SettingRow {
                         label: "Enabled"
                         help: "Turn this output on or off."
+                        visible: page.monitors.length > 1
                         ToggleSwitch {
                             checked: !model.disabled
                             onToggled: (v) => layout.setProperty(index, "disabled", !v)
@@ -349,12 +345,11 @@ Flickable {
             SectionCard {
                 width: column.width
                 title: "Layout"
-                description: "Changes apply immediately. Save them to keep the layout across reboots."
+                description: "Applying writes the managed block into monitors.lua and reloads Hyprland, so the layout survives a reboot."
                 Row {
                     width: parent.width
                     spacing: 8
-                    TButton { text: "Apply all"; primary: true; onClicked: page.applyAll() }
-                    TButton { text: "Make persistent"; onClicked: page.persistAll() }
+                    TButton { text: "Apply layout"; primary: true; onClicked: page.persistAll() }
                     TButton {
                         text: "Reset"
                         onClicked: page.loadLayout()

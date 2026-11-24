@@ -98,25 +98,51 @@ class ApplyTests(unittest.TestCase):
         self.assertFalse(result["ok"])
         self.assertEqual(result["requires"], "root")
 
-    def test_displays_apply_builds_monitor_spec(self):
-        with mock.patch.object(util, "run", return_value=RunResult(0, "", "")) as runner:
-            result = displays.action("displays.apply", {
-                "name": "DP-1", "mode": "1920x1080@60.00", "scale": 1,
-                "transform": 0, "vrr": 1, "x": 0, "y": 0,
-            })
-        self.assertTrue(result["ok"])
-        argv = runner.call_args[0][0]
-        self.assertEqual(argv[:3], ["hyprctl", "keyword", "monitor"])
-        self.assertEqual(argv[3], "DP-1,1920x1080@60.00,0x0,1,0,1")
+    def _live_monitor(self):
+        return [{
+            "name": "DP-1", "currentMode": "3840x1080@59.97", "scale": 1.0,
+            "transform": 0, "x": 0, "y": 0, "vrr": 0, "mirror": "",
+            "disabled": False, "width": 3840, "height": 1080, "refreshRate": 59.97,
+        }]
 
-    def test_displays_mirror_spec(self):
-        with mock.patch.object(util, "run", return_value=RunResult(0, "", "")) as runner:
+    def test_displays_apply_writes_layout(self):
+        target = self.tmp / "monitors.lua"
+        target.write_text("-- base\n")
+        with mock.patch.object(displays, "_live_monitors", return_value=self._live_monitor()), \
+             mock.patch.object(paths, "monitors_file", return_value=target), \
+             mock.patch.object(util, "run", return_value=RunResult(0, "", "")) as runner:
             result = displays.action("displays.apply", {
                 "name": "DP-1", "mode": "1920x1080@60.00", "scale": 1,
-                "transform": 0, "vrr": 0, "mirror": "DP-2", "x": 0, "y": 0,
+                "transform": 0, "vrr": 1, "mirror": "DP-2", "x": 0, "y": 0,
             })
         self.assertTrue(result["ok"])
-        self.assertEqual(runner.call_args[0][0][3], "DP-1,1920x1080@60.00,0x0,1,0,0,DP-2")
+        text = target.read_text()
+        self.assertIn('mode = "1920x1080@60.00"', text)
+        self.assertIn("vrr = 1", text)
+        self.assertIn('mirror = "DP-2"', text)
+        self.assertTrue(any(call[0][0][:2] == ["hyprctl", "reload"]
+                            for call in runner.call_args_list))
+
+    def test_displays_apply_refuses_disabling_last_monitor(self):
+        target = self.tmp / "monitors.lua"
+        target.write_text("-- base\n")
+        with mock.patch.object(displays, "_live_monitors", return_value=self._live_monitor()), \
+             mock.patch.object(paths, "monitors_file", return_value=target), \
+             mock.patch.object(util, "run", return_value=RunResult(0, "", "")):
+            result = displays.action("displays.apply", {"name": "DP-1", "disabled": True})
+        self.assertFalse(result["ok"])
+        self.assertEqual(target.read_text(), "-- base\n")
+
+    def test_displays_persist_refuses_all_disabled(self):
+        result = displays.action("displays.persist", {
+            "monitors": [{"name": "DP-1", "disabled": True}],
+        })
+        self.assertFalse(result["ok"])
+
+    def test_displays_reload_detects_unknown_request(self):
+        with mock.patch.object(util, "run", return_value=RunResult(0, "unknown request", "")):
+            result = displays.action("displays.reload", {})
+        self.assertFalse(result["ok"])
 
     def test_sound_apply_input_and_streams(self):
         calls = []

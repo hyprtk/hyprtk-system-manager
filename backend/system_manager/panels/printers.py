@@ -138,15 +138,24 @@ def probe() -> dict:
     ], status="partial")
 
 
+def _first_device() -> str:
+    devices = parse_lpinfo_v(util.run(["lpinfo", "-v"], timeout=20).out)
+    return devices[0]["uri"] if devices else ""
+
+
 def _add(changes: dict) -> dict:
     name = str(changes.get("new_name") or "").strip()
     if not name:
         return base.fail("A queue name is required")
     if " " in name:
         return base.fail("The queue name cannot contain spaces")
-    uri = str(changes.get("new_uri") or "").strip() or str(changes.get("new_device") or "").strip()
+    # A dropdown only submits a value when it is changed, so fall back to what the
+    # row displays: the first device lpinfo reported.
+    uri = (str(changes.get("new_uri") or "").strip()
+           or str(changes.get("new_device") or "").strip()
+           or _first_device())
     if not uri:
-        return base.fail("Choose a device (or enter a URI with the CUPS web interface)")
+        return base.fail("Choose a device, or enter the printer's ipp:// address")
     model = str(changes.get("new_model") or "everywhere").strip() or "everywhere"
     argv = ["lpadmin", "-p", name, "-E", "-v", uri, "-m", model]
     description = str(changes.get("new_description") or "").strip()

@@ -111,7 +111,17 @@ class ActionTests(unittest.TestCase):
     def test_add_validates_name_and_uri(self):
         self.assertFalse(printers.apply({"new_name": ""})["ok"])
         self.assertFalse(printers.apply({"new_name": "My Printer", "new_device": "cups-pdf:/"})["ok"])
-        self.assertFalse(printers.apply({"new_name": "Office", "new_device": ""})["ok"])
+        with mock.patch.object(printers, "_first_device", return_value=""):
+            self.assertFalse(printers.apply({"new_name": "Office", "new_device": ""})["ok"])
+
+    def test_add_falls_back_to_the_listed_device(self):
+        calls = []
+        with mock.patch.object(printers, "_first_device", return_value="cups-pdf:/"), \
+             mock.patch.object(printers.priv, "run_priv",
+                               side_effect=lambda argv, **kw: calls.append(argv) or RunResult(0, "", "")):
+            result = printers.apply({"new_name": "Office"})
+        self.assertTrue(result["ok"])
+        self.assertIn("cups-pdf:/", calls[0])
 
     def test_add_denied_reports_root(self):
         with mock.patch.object(printers.priv, "run_priv",

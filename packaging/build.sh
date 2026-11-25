@@ -84,7 +84,7 @@ case "${1:-arch}" in
                             echo repository=https://repo-default.voidlinux.org/current \
                                 > /etc/xbps.d/00-repository-main.conf
                             xbps-install -Suy xbps >/dev/null
-                            xbps-install -y python3 >/dev/null ;;
+                            xbps-install -y python3 bash >/dev/null ;;
                         *debian*|*ubuntu*)
                             apt-get update -qq >/dev/null
                             apt-get install -y -qq python3 >/dev/null ;;

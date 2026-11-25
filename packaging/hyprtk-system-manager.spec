@@ -4,7 +4,7 @@ Release:        1%{?dist}
 Summary:        System settings for the hyprtk desktop
 License:        MIT
 URL:            https://github.com/hyprtk/hyprtk-system-manager
-Source0:        %{url}/archive/v%{version}.tar.gz
+Source0:        %{name}-%{version}.tar.gz
 BuildArch:      noarch
 Requires:       python3
 Requires:       quickshell
@@ -33,5 +33,5 @@ DESTDIR=%{buildroot} ./install.sh --system --prefix /usr
 /usr/share/polkit-1/actions/org.hyprtk.system-manager.policy
 
 %changelog
-* Tue Nov 25 2026 hyprtk <hyprtk@users.noreply.github.com> - 0.6.0-1
-- Power, storage, privacy, bar and Hyprland pages; dry-run preview; profiles.
+* Wed Nov 25 2026 hyprtk <hyprtk@users.noreply.github.com> - 0.6.1-1
+- Packaging fixes: no bytecode in the payload; build script and Debian metadata.

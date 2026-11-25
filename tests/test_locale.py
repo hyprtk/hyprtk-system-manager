@@ -1,4 +1,5 @@
 import unittest
+from pathlib import Path
 from unittest import mock
 
 from system_manager import util
@@ -148,3 +149,89 @@ class ApplyTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class InputMethodTests(unittest.TestCase):
+    def setUp(self):
+        import os
+        import tempfile
+        from unittest import mock
+
+        from system_manager import paths
+        from system_manager.panels import locale
+
+        self.locale = locale
+        self.mock = mock
+        self.tmp = tempfile.mkdtemp(prefix="sm-im-")
+        self.hypr = os.path.join(self.tmp, "hypr")
+        os.makedirs(self.hypr)
+        self.env_file = os.path.join(self.hypr, "environment.lua")
+        with open(self.env_file, "w") as handle:
+            handle.write('hl.env("TERMINAL", "hyprtk-term")\n')
+        self.saved = os.environ.get("HYPRTK_HYPR_DIR")
+        os.environ["HYPRTK_HYPR_DIR"] = self.hypr
+        self.paths = paths
+
+    def tearDown(self):
+        import os
+
+        if self.saved is None:
+            os.environ.pop("HYPRTK_HYPR_DIR", None)
+        else:
+            os.environ["HYPRTK_HYPR_DIR"] = self.saved
+
+    def test_block_round_trip_preserves_the_rest(self):
+        text = self.locale.im_block("fcitx5")
+        self.assertIn('GTK_IM_MODULE", "fcitx"', text)
+        self.assertEqual(self.locale.strip_im_block("a\n" + text + "b\n"), "a\nb\n")
+
+    def test_read_im_from_block_and_from_plain_env(self):
+        self.assertEqual(self.locale.read_im(self.locale.im_block("ibus")), "ibus")
+        plain = 'hl.env("GTK_IM_MODULE", "fcitx")\n'
+        self.assertEqual(self.locale.read_im(plain), "fcitx5")
+
+    def test_apply_writes_the_block_and_reloads(self):
+        with self.mock.patch.object(self.locale.base, "hypr_reload",
+                                    return_value=(True, "ok")):
+            result = self.locale.apply({"im_framework": "fcitx5"})
+        self.assertTrue(result["ok"], result)
+        text = Path(self.env_file).read_text()
+        self.assertIn(self.locale.IM_START, text)
+        self.assertIn('hl.env("TERMINAL", "hyprtk-term")', text)
+        self.assertEqual(self.locale.read_im(text), "fcitx5")
+
+    def test_apply_rolls_back_when_hyprland_rejects(self):
+        with self.mock.patch.object(self.locale.base, "hypr_reload",
+                                    return_value=(False, "error: nope")):
+            result = self.locale.apply({"im_framework": "ibus"})
+        self.assertFalse(result["ok"])
+        self.assertNotIn(self.locale.IM_START, Path(self.env_file).read_text())
+
+    def test_none_removes_the_block(self):
+        with self.mock.patch.object(self.locale.base, "hypr_reload",
+                                    return_value=(True, "ok")):
+            self.locale.apply({"im_framework": "fcitx5"})
+            result = self.locale.apply({"im_framework": "none"})
+        self.assertTrue(result["ok"])
+        self.assertNotIn(self.locale.IM_START, Path(self.env_file).read_text())
+
+    def test_unknown_framework_is_refused(self):
+        result = self.locale.apply({"im_framework": "magic"})
+        self.assertFalse(result["ok"])
+
+    def test_no_environment_file_is_reported(self):
+        import os
+
+        os.unlink(self.env_file)
+        result = self.locale.apply({"im_framework": "ibus"})
+        self.assertFalse(result["ok"])
+        self.assertIn("environment.lua", result["message"])
+
+    def test_probe_has_the_section(self):
+        with self.mock.patch.object(self.locale.util, "which", return_value=None), \
+             self.mock.patch.object(self.locale.util, "run",
+                                    return_value=self.mock.Mock(ok=False, out="", lines=list)), \
+             self.mock.patch.object(self.locale.util, "read_text", return_value=""):
+            page = self.locale.probe()
+        titles = [section["title"] for section in page["sections"]]
+        self.assertIn("Input methods", titles)

@@ -137,6 +137,12 @@ if [ "$DRY_RUN" -eq 1 ]; then
     exit 0
 fi
 
+# A package build stages the tree into DESTDIR on a build host that has no
+# desktop stack; the runtime requirements belong in the package metadata.
+if [ -n "$DESTDIR" ]; then
+    MISSING=""
+fi
+
 if [ -n "$MISSING" ]; then
     echo ":: ERROR: missing runtime requirements:" >&2
     while IFS= read -r dep; do [ -n "$dep" ] && echo "   - $dep" >&2; done <<<"$MISSING"

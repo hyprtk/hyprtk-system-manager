@@ -1,0 +1,17 @@
+# Maintainer: hyprtk <hyprtk@users.noreply.github.com>
+pkgname=hyprtk-system-manager
+pkgver=0.6.0
+pkgrel=0
+pkgdesc="System settings for the hyprtk desktop"
+url="https://github.com/hyprtk/hyprtk-system-manager"
+arch="noarch"
+license="MIT"
+depends="python3 polkit"
+makedepends=""
+source="$pkgname-$pkgver.tar.gz::$url/archive/v$pkgver.tar.gz"
+builddir="$srcdir/$pkgname-$pkgver"
+
+package() {
+	cd "$builddir"
+	DESTDIR="$pkgdir" ./install.sh --system --prefix /usr
+}

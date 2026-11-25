@@ -1,0 +1,25 @@
+# Maintainer: hyprtk <hyprtk@users.noreply.github.com>
+pkgname=hyprtk-system-manager
+pkgver=0.6.0
+pkgrel=1
+pkgdesc="System settings for the hyprtk desktop: power, storage, privacy, bar and Hyprland"
+arch=('any')
+url="https://github.com/hyprtk/hyprtk-system-manager"
+license=('MIT')
+depends=('python' 'quickshell' 'polkit')
+optdepends=(
+  'udisks2: mount removable media'
+  'power-profiles-daemon: switch the platform profile'
+  'ufw: manage the firewall'
+  'nftables: nftables status and service'
+  'flatpak: per-app sandbox permissions'
+  'cups: printer management'
+  'networkmanager: network and VPN panels'
+)
+source=("$pkgname-$pkgver.tar.gz::$url/archive/v$pkgver.tar.gz")
+sha256sums=('SKIP')
+
+package() {
+  cd "$srcdir/$pkgname-$pkgver"
+  DESTDIR="$pkgdir" ./install.sh --system --prefix /usr
+}

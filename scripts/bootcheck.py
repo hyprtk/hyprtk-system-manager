@@ -14,7 +14,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-PAGES = ["about", "displays", "users", "suite", "privacy"]
+PAGES = ["about", "displays", "users", "suite", "privacy", "power", "storage", "bar"]
 ROOT = Path(__file__).resolve().parents[1]
 
 

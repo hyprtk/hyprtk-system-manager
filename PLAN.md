@@ -5,7 +5,7 @@ hyprtk suite. One window, one page stack, one apply model, honest capability
 reporting.
 
 Binary: **`hyprtk-settings`** · Desktop id: **`hyprtk-system-manager`** ·
-Version: **0.1.0** (scaffold)
+Version: **0.6.0** (roadmap complete)
 
 ---
 
@@ -293,7 +293,8 @@ otherwise            → pkexec <cmd>        (polkit agent prompts)
 - [x] Users: groups and shell dialogs
 - [x] Input: persist the exposed settings to input.lua (managed block)
 - [x] Fonts: install picker
-- [ ] Power: `powerprofilesctl`/`tlp` when present, lid/battery actions
+- [x] Power: `powerprofilesctl`/`tlp` when present, lid/battery actions,
+      charge limits through the polkit helper
 - [x] Displays: drag/VRR/mirror, bit depth and colour management (presets only;
       no saved per-monitor profiles yet)
 - [x] Search: row-level index, recents, suggested group in the sidebar
@@ -306,24 +307,32 @@ otherwise            → pkexec <cmd>        (polkit agent prompts)
       state reported), Orca and on-screen-keyboard availability + launch
 - [x] Printers: add (lpadmin, device + driverless), remove, default, test page,
       CUPS web interface
-- [ ] Storage: format/mount policies, fstab editor with validation
+- [x] Storage: mount/unmount, `findmnt`-validated fstab editor, formatting
+      for unmounted removable partitions behind a typed confirmation
 - [x] Region: locale generation (`/etc/locale.gen` + `locale-gen` in one
       privileged call), console keymap (input methods still open)
-- [ ] Privacy: firewall rules, per-app permissions
+- [x] Privacy: ufw/nftables state and enable, capturing applications,
+      Flatpak permission overrides and reset
 
 ### M3 — suite
 
-- [ ] Replace config-manager's standalone launch with a System Settings
-      "Hyprland" host that embeds its pages
-- [ ] Suite panel writes bar-qt settings inline (all 10 bar pages)
-- [ ] Shared settings bus (`org.hyprtk.Settings`) so apps deep-link to a row
+- [x] Replace config-manager's standalone launch with a System Settings
+      "Hyprland" host that embeds its pages (its schema and values are rendered
+      by this app's form model; writes still go through `config-manager set`)
+- [x] Suite panel writes bar-qt settings inline — a dedicated **Bar** panel
+      renders the whole `config.json`, every key, grouped as the file stores it
+- [x] Shared settings bus (`org.hyprtk.Settings`) so apps deep-link to a row
+      (Unix socket plus an optional Gio D-Bus service, `Open(panel, row)`)
 
 ### M4 — hardening
 
-- [ ] Root helper with a polkit policy + action ids
-- [ ] Apply dry-run preview (diff) for every file write
-- [ ] Session restore, per-host profiles
-- [ ] Packaging for Arch/Fedora/Debian/openSUSE/Void/Alpine + ISO inclusion
+- [x] Root helper with a polkit policy + action ids (`hyprtk-sm-helper`, an
+      allow-list of binaries, verbs and writable paths)
+- [x] Apply dry-run preview (diff) for every file write (Preview button; panels
+      that act on the system instead of a file refuse rather than pretend)
+- [x] Session restore (Snapshots panel) and per-host profiles (Profiles panel)
+- [x] Packaging for Arch/Fedora/Debian/openSUSE/Void/Alpine + ISO inclusion
+      (`packaging/`, `install.sh --prefix` and `DESTDIR`)
 
 ---
 
@@ -346,7 +355,7 @@ otherwise            → pkexec <cmd>        (polkit agent prompts)
 
 | Risk | Mitigation |
 |---|---|
-| Writing someone else's config (Hyprland Lua) | Never: Displays writes a marked managed block; everything else links to config-manager |
+| Writing someone else's config (Hyprland Lua) | Displays writes a marked managed block; every other compositor setting goes through `config-manager set`, which owns validation and backups |
 | Privilege prompts in a GUI | pkexec with a running polkit agent; every action reports the command; no silent sudo |
 | Partial panels looking complete | status pill per panel, derived from capability probes |
 | Quickshell window tiling/misplacement | detached `place` helper via `hyprctl clients`, opaque panel, `QS_APP_ID`; suite window rule |

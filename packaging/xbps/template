@@ -1,0 +1,19 @@
+# Template for Void's xbps-src (void-packages/srcpkgs/hyprtk-system-manager/template)
+pkgname=hyprtk-system-manager
+version=0.6.0
+revision=1
+build_style=gnu-makefile
+make_build_target=all
+make_install_target=install
+hostmakedepends=""
+depends="python3 polkit"
+short_desc="System settings for the hyprtk desktop"
+maintainer="hyprtk <hyprtk@users.noreply.github.com>"
+license="MIT"
+homepage="https://github.com/hyprtk/hyprtk-system-manager"
+distfiles="${homepage}/archive/v${version}.tar.gz"
+checksum=SKIP
+
+do_install() {
+	DESTDIR="${DESTDIR}" ./install.sh --system --prefix /usr
+}

@@ -1,0 +1,16 @@
+Source: hyprtk-system-manager
+Section: admin
+Priority: optional
+Maintainer: hyprtk <hyprtk@users.noreply.github.com>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.2
+Homepage: https://github.com/hyprtk/hyprtk-system-manager
+
+Package: hyprtk-system-manager
+Architecture: all
+Depends: python3, quickshell, polkitd | policykit-1, ${misc:Depends}
+Recommends: udisks2, power-profiles-daemon, flatpak
+Description: System settings for the hyprtk desktop
+ One searchable settings application for the Hyprland desktop: power,
+ storage, privacy, the bar itself and the compositor pages from
+ config-manager.

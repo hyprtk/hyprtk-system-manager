@@ -1,0 +1,9 @@
+#!/usr/bin/make -f
+%:
+	dh $@
+
+override_dh_auto_install:
+	DESTDIR=$(CURDIR)/debian/hyprtk-system-manager ./install.sh --system --prefix /usr
+
+override_dh_auto_build:
+override_dh_auto_test:

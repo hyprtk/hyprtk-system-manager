@@ -1,0 +1,5 @@
+usr/share/hyprtk-system-manager usr/share
+usr/bin/hyprtk-settings usr/bin
+usr/share/applications/hyprtk-system-manager.desktop usr/share/applications
+usr/libexec/hyprtk-sm-helper usr/libexec
+usr/share/polkit-1/actions/org.hyprtk.system-manager.policy usr/share/polkit-1/actions

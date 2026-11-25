@@ -53,17 +53,23 @@ hyprtk-system-manager borrows the good parts and drops the rest:
 
 | System | Hardware | Network | Personalisation |
 |---|---|---|---|
-| About · Date & Time · Region & Language · Users & Groups · Services · Updates | Displays · Graphics · Sound · Input Devices · Power · Bluetooth · Printers · Storage | Network | Appearance · Fonts · Notifications |
+| About · Date & Time · Region & Language · Users & Groups · Services · Snapshots · Profiles · Updates | Displays · Graphics · Sound · Input Devices · Power · Bluetooth · Printers · Storage | Network | Appearance · Fonts · Notifications |
 
 | Desktop | Applications | Security | Accessibility |
 |---|---|---|---|
-| Hyprland · Keyboard Shortcuts · Autostart | Default Applications · hyprtk Suite | Privacy & Security | Accessibility |
+| Bar · Hyprland · Keyboard Shortcuts · Autostart | Default Applications · hyprtk Suite | Privacy & Security | Accessibility |
 
-Fully implemented in 0.5.0: **About, Date & Time, Users & Groups, Displays,
-Sound, Printers, Appearance, Fonts, Autostart, hyprtk Suite**. Network, Region,
-Accessibility and Input are `partial` — every control they show is real, but
-each has a documented gap (per-monitor profiles, input methods, an a11y settings
-daemon); the rest are read-only probes. See [PLAN.md](PLAN.md).
+Fully implemented: **About, Date & Time, Users & Groups, Displays, Sound,
+Printers, Appearance, Fonts, Autostart, hyprtk Suite, Power, Storage, Privacy,
+Bar, Hyprland, Snapshots, Profiles**. Network, Region, Accessibility and Input are
+`partial` — every control they show is real, but each has a documented gap
+(per-monitor profiles, input methods, an a11y settings daemon); the rest are
+read-only probes. See [PLAN.md](PLAN.md).
+
+Apply is previewable: **Preview** shows a unified diff of every file an Apply
+would change and writes nothing. Panels that act on the system instead of a file
+say so. Other apps can deep-link to a row with
+`hyprtk-settings open --page power --row "Charge limit"`.
 
 ## Architecture
 

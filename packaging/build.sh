@@ -77,7 +77,22 @@ case "${1:-arch}" in
         ( cd "$WD" && tar xzf "$TARBALL" )
         podman run --rm -v "$WD/$NAME-$VERSION:/src:Z" -w /src "$IMAGE" \
             bash -euc '
-                command -v python3 >/dev/null || { echo "image has no python3" >&2; exit 1; }
+                if ! command -v python3 >/dev/null; then
+                    case "'"$IMAGE"'" in
+                        *alpine*) apk add --no-cache python3 >/dev/null ;;
+                        *void*)
+                            echo repository=https://repo-default.voidlinux.org/current \
+                                > /etc/xbps.d/00-repository-main.conf
+                            xbps-install -Suy xbps >/dev/null
+                            xbps-install -y python3 >/dev/null ;;
+                        *debian*|*ubuntu*)
+                            apt-get update -qq >/dev/null
+                            apt-get install -y -qq python3 >/dev/null ;;
+                        *fedora*|*opensuse*|*tumbleweed*)
+                            dnf install -y -q python3 >/dev/null ;;
+                        *arch*) pacman -Sy --noconfirm python >/dev/null ;;
+                    esac
+                fi
                 printf "#!/bin/sh\nexit 0\n" > /usr/local/bin/qs
                 chmod +x /usr/local/bin/qs
                 mkdir -p /tmp/root

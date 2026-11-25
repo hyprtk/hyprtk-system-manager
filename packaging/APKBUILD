@@ -1,6 +1,6 @@
 # Maintainer: hyprtk <hyprtk@users.noreply.github.com>
 pkgname=hyprtk-system-manager
-pkgver=0.6.1
+pkgver=0.6.2
 pkgrel=0
 pkgdesc="System settings for the hyprtk desktop"
 url="https://github.com/hyprtk/hyprtk-system-manager"

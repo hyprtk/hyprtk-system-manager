@@ -1,6 +1,6 @@
 # Template for Void's xbps-src (void-packages/srcpkgs/hyprtk-system-manager/template)
 pkgname=hyprtk-system-manager
-version=0.6.1
+version=0.6.2
 revision=1
 build_style=gnu-makefile
 make_build_target=all

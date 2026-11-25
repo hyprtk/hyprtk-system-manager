@@ -1,4 +1,12 @@
-hyprtk-system-manager (0.6.1-1) unstable; urgency=medium
+hyprtk-system-manager (0.6.2-1) unstable; urgency=medium
+
+  * Packaging: build script for all five families, Debian metadata, staged
+    install checks on Alpine and Void, and a DESTDIR build no longer requires
+    the desktop runtime.
+
+ -- hyprtk <hyprtk@users.noreply.github.com>  Wed, 25 Nov 2026 12:00:00 +0000
+
+hyprtk-system-manager (0.6.2-1) unstable; urgency=medium
 
   * System settings for the hyprtk desktop: power, storage, privacy, bar,
     Hyprland pages, preview, profiles, polkit helper.

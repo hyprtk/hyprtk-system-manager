@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.6.2] — 2026-11-25
+
+### Packaging
+
+- `packaging/build.sh` builds and verifies every family: Arch (`makepkg`), a
+  real `.deb` in `debian:bookworm`, a real `.rpm` in a Fedora container, and a
+  staged `DESTDIR` install in `alpine:3.24` and Void. Verified on all five.
+- Debian `changelog` and `source/format` added; `debian/rules` installs into
+  `debian/tmp` so `dh_install` maps the payload.
+- The RPM spec takes the staged source tarball by name instead of a URL.
+- A `DESTDIR` staging build no longer requires quickshell on the build host;
+  runtime requirements live in the package metadata.
+
 ## [0.6.1] — 2026-11-25
 
 ### Fixed

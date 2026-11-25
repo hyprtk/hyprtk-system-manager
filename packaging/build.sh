@@ -76,10 +76,10 @@ case "${1:-arch}" in
         IMAGE="${2:?usage: build.sh stage <image>}"
         ( cd "$WD" && tar xzf "$TARBALL" )
         podman run --rm -v "$WD/$NAME-$VERSION:/src:Z" -w /src "$IMAGE" \
-            bash -euc '
+            sh -ec '
                 if ! command -v python3 >/dev/null; then
                     case "'"$IMAGE"'" in
-                        *alpine*) apk add --no-cache python3 >/dev/null ;;
+                        *alpine*) apk add --no-cache python3 bash >/dev/null ;;
                         *void*)
                             echo repository=https://repo-default.voidlinux.org/current \
                                 > /etc/xbps.d/00-repository-main.conf

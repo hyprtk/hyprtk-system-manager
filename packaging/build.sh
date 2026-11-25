@@ -54,7 +54,7 @@ case "${1:-arch}" in
                 dpkg-buildpackage -b -us -uc >/tmp/build.log 2>&1 || { tail -40 /tmp/build.log; exit 1; }
                 cp ../*.deb /src/
             '
-        cp "$WD"/*.deb "$OUT/"
+        cp "$WD/$NAME-$VERSION"/*.deb "$OUT/"
         echo "built: $(ls "$OUT"/*.deb | tail -1)"
         ;;
     rpm)

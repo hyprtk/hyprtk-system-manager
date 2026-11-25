@@ -201,8 +201,9 @@ fi
 command -v update-desktop-database >/dev/null 2>&1 \
     && update-desktop-database "$APPS_DIR" >/dev/null 2>&1 || true
 
-PYTHONPATH="$INSTALL_DIR_D/backend" python3 -m system_manager.cli version >/dev/null
-echo ":: Backend import OK ($(PYTHONPATH="$INSTALL_DIR_D/backend" python3 -m system_manager.cli version))"
+PYTHONPATH="$INSTALL_DIR_D/backend" PYTHONDONTWRITEBYTECODE=1 \
+    python3 -m system_manager.cli version >/dev/null
+echo ":: Backend import OK ($(PYTHONPATH="$INSTALL_DIR_D/backend" PYTHONDONTWRITEBYTECODE=1 python3 -m system_manager.cli version))"
 
 echo ":: Installed."
 echo ":: Run:       $LAUNCHER_NAME"

@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.6.1] — 2026-11-25
+
+### Fixed
+
+- **The installer's own import check left `__pycache__` in the payload.** It ran
+  `python3 -m system_manager.cli version` after staging, which writes bytecode
+  beside the installed modules — harmless locally, but every distro package then
+  contained compiled-path references and makepkg warned about `$pkgdir`. The
+  check now runs with `PYTHONDONTWRITEBYTECODE=1`.
+
+### Added
+
+- `packaging/build.sh`: builds the Arch package with `makepkg`, a real `.deb`
+  in `debian:bookworm`, a real `.rpm` in a Fedora container, and a staged
+  `DESTDIR` install in any image (how the Alpine and Void recipes are checked).
+- Debian `changelog` and `source/format`.
+
 ## [0.6.0] — 2026-11-25
 
 Closes the remaining roadmap: Power, Storage and Privacy are real panels, the

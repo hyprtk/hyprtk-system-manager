@@ -1,4 +1,4 @@
-hyprtk-system-manager (0.6.0-1) unstable; urgency=medium
+hyprtk-system-manager (0.6.1-1) unstable; urgency=medium
 
   * System settings for the hyprtk desktop: power, storage, privacy, bar,
     Hyprland pages, preview, profiles, polkit helper.

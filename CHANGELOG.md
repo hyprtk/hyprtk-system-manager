@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.7.0] — 2026-11-25
+
+Closes the documented panel gaps that are closable on this stack.
+
+### Added
+
+- **Displays: layout profiles.** Save the current arrangement under a name
+  (mode, scale, rotation, position, VRR, mirroring, bit depth, colour preset),
+  apply it later with one action, delete it. Profiles live in
+  `~/.config/hyprtk-system-manager/displays.json`; applying still writes the
+  managed block and reloads, so a profile switch survives a reboot.
+- **Region & Language: input methods.** Detects fcitx5/fcitx/ibus, reports the
+  running daemon and the live `GTK_IM_MODULE`/`QT_IM_MODULE`/`XMODIFIERS`, and
+  writes a managed block into `environment.lua` for new sessions (with reload
+  rollback). An action starts the framework now.
+- **Network: DNS.** Per-connection DNS servers, search domains and the
+  DHCP-DNS override, validated before anything reaches `nmcli`; the panel says
+  the change applies on the next activation.
+
+### Changed
+
+- Network, Displays and Region report `functional` when the tools they need are
+  present.
+- The remaining `partial` labels are documented limitations rather than missing
+  code: accessibility keyboard aids need a settings daemon this desktop does not
+  ship, and per-device pointer/keyboard overrides belong to config-manager.
+
 ## [0.6.2] — 2026-11-25
 
 ### Packaging

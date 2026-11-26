@@ -1,5 +1,5 @@
 Name:           hyprtk-system-manager
-Version:        0.7.1
+Version:        0.7.2
 Release:        1%{?dist}
 Summary:        System settings for the hyprtk desktop
 License:        MIT

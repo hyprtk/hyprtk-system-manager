@@ -1,5 +1,6 @@
 import argparse
 import json
+import os
 import socket
 import tempfile
 import threading
@@ -24,13 +25,16 @@ class QueueTests(unittest.TestCase):
 class SocketTests(unittest.TestCase):
     def setUp(self):
         self.tmp = Path(tempfile.mkdtemp(prefix="sm-bus-"))
-        self.saved = bus.SOCKET
+        # Every runtime file, or a test would touch the live session's bus.
+        self.saved = (bus.SOCKET, bus.HEARTBEAT, bus.PIDFILE)
         bus.SOCKET = self.tmp / "bus.sock"
+        bus.HEARTBEAT = self.tmp / "bus.heartbeat"
+        bus.PIDFILE = self.tmp / "bus.pid"
         bus._STARTED["socket"] = False
         bus.poll()
 
     def tearDown(self):
-        bus.SOCKET = self.saved
+        bus.SOCKET, bus.HEARTBEAT, bus.PIDFILE = self.saved
         bus._STARTED["socket"] = False
 
     def test_send_without_a_listener_returns_none(self):
@@ -54,6 +58,36 @@ class SocketTests(unittest.TestCase):
         started = bus.start()
         self.assertTrue(started["started"])
         self.assertTrue(bus.send({"panel": "about"}))
+
+    def test_a_backend_with_a_window_gets_the_request(self):
+        bus.start()
+        with mock.patch.object(bus, "_surface_pids", return_value={os.getpid()}):
+            self.assertEqual(bus.send({"panel": "power"}), {"ok": True})
+
+    def test_a_backend_without_a_surface_is_reaped(self):
+        """A layer surface can be unmapped by a monitor reload while the backend
+        keeps answering; the next launch must not be swallowed."""
+        bus.start()
+        old = time.time() - 30
+        os.utime(bus.PIDFILE, (old, old))
+        with mock.patch.object(bus, "_surface_pids", return_value=set()):
+            self.assertIsNone(bus.send({"panel": "power"}))
+        self.assertFalse(bus.SOCKET.exists(), "the stranded socket should be gone")
+
+    def test_a_stale_heartbeat_is_reaped(self):
+        bus.start()
+        old = time.time() - 60
+        os.utime(bus.HEARTBEAT, (old, old))
+        self.assertIsNone(bus.send({"panel": "power"}))
+
+    def test_ownership_matches_only_our_processes(self):
+        self.assertTrue(bus.is_ours_argv(["qs", "-p", "/home/u/.local/share/hyprtk-system-manager"]))
+        self.assertTrue(bus.is_ours_argv(["python3", "-m", "system_manager.cli", "serve"]))
+        # A shell whose -c string merely mentions the project path is not ours.
+        self.assertFalse(bus.is_ours_argv(
+            ["/usr/bin/zsh", "-c", "cd ~/Projects/AI-Projects/hyprtk-system-manager && python3 -m unittest"]))
+        self.assertFalse(bus.is_ours_argv(["/usr/bin/qs", "-p", "/home/u/.config/quickshell/hyprtk-bar-qt"]))
+        self.assertFalse(bus.is_ours_argv([]))
 
     def test_permissions_are_private(self):
         bus.start()

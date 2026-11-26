@@ -53,6 +53,67 @@ class AllowListTests(unittest.TestCase):
         self.assertIn("no command", helper.check("storage", []))
 
 
+class PathTraversalTests(unittest.TestCase):
+    """The allow-list is the security boundary; `..` must not escape it."""
+
+    def test_install_cannot_climb_out_of_run_media(self):
+        reason = helper.check("storage", ["install", "-m", "0644", "/tmp/x",
+                                          "/run/media/../../etc/sudoers"])
+        self.assertIn("outside", reason)
+
+    def test_install_dash_d_cannot_climb_out_of_mnt(self):
+        reason = helper.check("storage", ["install", "-d", "/mnt/../../etc/cron.d/evil"])
+        self.assertIn("outside", reason)
+
+    def test_tee_cannot_climb_out_of_sys(self):
+        reason = helper.check("power", ["tee", "/sys/class/leds/../../../etc/sudoers"])
+        self.assertIn("outside", reason)
+
+    def test_normalisation_keeps_legitimate_targets(self):
+        self.assertEqual(helper.check("storage", ["install", "-d", "-m", "0755",
+                                                  "/mnt/a/../data"]), "")
+
+
+class PrivilegeEscalationTests(unittest.TestCase):
+    def test_install_cannot_set_suid(self):
+        reason = helper.check("storage", ["install", "-m", "4755", "/tmp/payload",
+                                          "/mnt/ok"])
+        self.assertIn("setuid", reason)
+
+    def test_install_cannot_copy_a_protected_source(self):
+        reason = helper.check("storage", ["install", "-m", "0644", "/etc/shadow",
+                                          "/mnt/evil"])
+        self.assertIn("may not copy", reason)
+
+    def test_install_rejects_owner_override(self):
+        reason = helper.check("storage", ["install", "-o", "root", "-g", "root",
+                                          "/tmp/x", "/mnt/ok"])
+        self.assertIn("-o is not allowed", reason)
+
+    def test_grub_mkconfig_cannot_write_elsewhere(self):
+        self.assertIn("only accepts", helper.check("system", ["grub-mkconfig", "-o",
+                                                             "/etc/sudoers"]))
+        self.assertEqual(helper.check("system", ["grub-mkconfig", "-o",
+                                                 "/boot/grub/grub.cfg"]), "")
+
+    def test_usermod_cannot_set_a_password_hash(self):
+        reason = helper.check("users", ["usermod", "-p", "$6$x$y", "root"])
+        self.assertIn("not allowed", reason)
+        self.assertEqual(helper.check("users", ["usermod", "-a", "-G", "video", "hyprtk"]), "")
+
+    def test_passwd_needs_exactly_one_user(self):
+        self.assertIn("one user", helper.check("users", ["passwd", "-d", "root"]))
+        self.assertEqual(helper.check("users", ["passwd", "alice"]), "")
+
+    def test_chpasswd_cannot_chroot(self):
+        self.assertIn("not allowed", helper.check("users", ["chpasswd", "-R", "/tmp/x"]))
+        self.assertEqual(helper.check("users", ["chpasswd", "-e"]), "")
+
+    def test_systemctl_cannot_target_another_root(self):
+        reason = helper.check("system", ["systemctl", "--root=/mnt", "restart", "ssh"])
+        self.assertIn("--root=/mnt", reason)
+
+
 class HelperMainTests(unittest.TestCase):
     def test_refuses_without_root(self):
         # check() passes, then the euid guard refuses in the test process.

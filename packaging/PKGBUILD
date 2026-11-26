@@ -1,6 +1,6 @@
 # Maintainer: hyprtk <hyprtk@users.noreply.github.com>
 pkgname=hyprtk-system-manager
-pkgver=0.7.0
+pkgver=0.7.1
 pkgrel=1
 pkgdesc="System settings for the hyprtk desktop: power, storage, privacy, bar and Hyprland"
 arch=('any')

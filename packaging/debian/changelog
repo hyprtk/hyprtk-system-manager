@@ -1,3 +1,10 @@
+hyprtk-system-manager (0.7.2-1) unstable; urgency=medium
+
+  * Launch fix: a backend whose window the compositor dropped no longer
+    swallows every later launch ("focused the running window" with no window).
+
+ -- Kori Tk <hyprtk@users.noreply.github.com>  Thu, 26 Nov 2026 15:20:00 +0000
+
 hyprtk-system-manager (0.7.1-1) unstable; urgency=medium
 
   * Security: close five ways past the polkit helper's allow-list (path
